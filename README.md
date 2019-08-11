@@ -273,14 +273,14 @@ custodian run -s /tmp --profile cc -c ~/environment/securityhub-remediations/mod
 5. Click the checkbox for the finding (There should only be one at this point, but checkbox the first (most recently updated)
 6. Click "Actions" then in the popup click on "Ec2 DenySnapStop"
 7. You should observe a green notification at top of page saying "Successfully send findings to Amazon CloudwatchEvents" and sometime in the future will include the action name once they implement my PFR.
-8. Review the Cloudwatch log of the Lambda which got invoked.  LogGroupNames are composed of the prefix "/aws/lambda/custodian-" followed by the policy name. 
-9. 
-
+8. Review the Cloudwatch log of the Lambda which got invoked.  LogGroupNames are composed of the prefix "/aws/lambda/custodian-" followed by the policy name. Lines with "ERROR" indicate something is wrong.  You should see at least a line containing "invoking action:" for each action in the policy.
+9. Optional, you can use the AWS Console and/or cli to confirm that the instance named "RemediationTestTarget" has really be stopped, snapshotted, and the IAM Instance Profile dissassociated.
+10. Now run the following commands to start the instance, and associate the InstanceProfile so the instance is ready for the next module.
 ```
 aws ec2 start-instances --instance-ids $(aws ec2 describe-instances --filters "Name=tag:Name,Values=RemediationTestTarget" --query Reservations[*].Instances[*].[InstanceId] --output text)
 aws ec2 associate-iam-instance-profile --iam-instance-profile Name=Cloud9Instance --instance-id $(aws ec2 describe-instances --filters "Name=tag:Name,Values=RemediationTestTarget" --query Reservations[*].Instances[*].[InstanceId] --output text)
-
 ```
+
 ## Module 3 - Automated Remediations - GuardDuty Event on EC2 Instance
 
 ## Module 4 - Automated Remediations - GuardDuty Event on IAMUser
