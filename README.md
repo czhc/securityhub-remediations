@@ -35,5 +35,11 @@ or be comfortable setting up a python3 environment with pip3, ssh, and any text 
 
 # Module 2 - Security Hub Custom Actions - Human initiated automation
 
-# Module 3 - Security Hub Automated Memediations
+# Module 3 - Automated Remediations - GuardDuty Event on EC2 Instance
+
+# Module 4 - Automated Remediations - GuardDuty Event on IAMUser
+
+# Module 5 - Automated Remediations - GuardDuty Event on EC2 Instance - Isolate rather than Stop
+
+
 
