@@ -39,16 +39,18 @@ or be comfortable setting up a python3 environment with pip3, ssh, and any text 
       2. Click "Create policy"
       3. Click the "JSON" tab
       4. Replace the prepopulated text with the following:
->{
->    "Version": "2012-10-17",
->    "Statement": [
->        {
->            "Effect": "Allow",
->            "Action": "guardduty:CreateSampleFindings",
->            "Resource": "arn:aws:guardduty:*:*:detector/*"
->        }
->    ]
->}
+```json
+{
+    "Version": "2012-10-17",
+    "Statement": [
+        {
+            "Effect": "Allow",
+            "Action": "guardduty:CreateSampleFindings",
+            "Resource": "arn:aws:guardduty:*:*:detector/*"
+        }
+    ]
+}
+```
       5. Click "Review Policy"
       6. In the Name field, enter "Cloud9RemediationTesting"
       7. Click "Create Policy"
