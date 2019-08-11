@@ -35,9 +35,9 @@ or be comfortable setting up a python3 environment with pip3, ssh, and any text 
     5. On the "Review" page, click "Create environment"
 3. Creating an IAM Policy for the Cloud9 EC2 Instance
     1. Open https://console.aws.amazon.com/iam/home?region=us-east-1#/policies
-    1. Click "Create policy"
-    1. Click the "JSON" tab
-    1. Replace the prepopulated text with the following:
+    2. Click "Create policy"
+    3. Click the "JSON" tab
+    4. Replace the prepopulated text with the following:
 ```json
 {
     "Version": "2012-10-17",
@@ -50,9 +50,9 @@ or be comfortable setting up a python3 environment with pip3, ssh, and any text 
     ]
 }
 ``` 
-    1. Click "Review Policy"
-    1. In the Name field, enter "Cloud9RemediationTesting"
-    1. Click "Create Policy"
+    5. Click "Review Policy"
+    6. In the Name field, enter "Cloud9RemediationTesting"
+    7. Click "Create Policy"
 4. Creating an IAM Policy for CloudCustodian 
     1. Click "Create policy"
     2. Click the "JSON" tab
@@ -147,34 +147,34 @@ or be comfortable setting up a python3 environment with pip3, ssh, and any text 
     ]
 }
 ```
-3.2.4. Replace "{AWS_ACCOUNT_NUMBER}" with your AWS Account number, otherwise you will get validation errors on the next step.
-3.2.5. Click "Review Policy"
-3.2.6. In the Name field, enter "CloudCustodian"
-3.2.7. Click "Create Policy"
-3.3. Creating a Role for the Cloud9 EC2 Instance
-3.3.1. Click "Create Role"
-3.3.2. Under "Choose the service that will use this role, click "EC2" then "Next: Permissions"
-3.3.3. In the "Filter Policies" searchbox, Enter "Cloud9RemediationTesting" then hit return.
-3.3.4. Click the checkbox for the "Cloud9RemediationTesting" policy
-3.3.5. Click "Next: Tags"
-3.3.6. Click "Next: Review"
-3.3.7. In "Role name", enter "Cloud9Instance"
-3.3.8. Click "Create role"
-3.4. Creating a Role for the Cloud Custodian
-3.4.1. Click "Create Role"
-3.4.2. Under "Choose the service that will use this role, click "Lambda" then "Next: Permissions"
-3.4.3. In the "Filter Policies" searchbox, Enter "CloudCustodian" then hit return.
-3.4.4. Click the checkbox for the "CloudCustodian" policy
-3.4.5. In the "Filter Policies" searchbox, Replace the text in the "Filter Policies" searchbox with "SecurityAudit".  
-3.4.6. Click the checkbox next to "SecurityAudit", and if more than one appears, select the one with the AWS Managed Policies icon (an orange cube)
-3.4.7. Click "Next: Tags"
-3.4.5. Click "Next: Review"
-3.4.6. In "Role name", enter "CloudCustodian"
-3.4.7. Click "Create role" 
-3.4.8. Click on the "CloudCustodian" role that was just created.
-3.4.9. Click on the "Trust relationships" tab.
-3.4.10. Click on "Edit trust relationship"
-3.4.11. Replace the prepopulated text with the following, and replace the "{AWS_ACCOUNT_NUMBER}" with your AWS account id.  If 
+    4. Replace "{AWS_ACCOUNT_NUMBER}" with your AWS Account number, otherwise you will get validation errors on the next step.
+    5. Click "Review Policy"
+    6. In the Name field, enter "CloudCustodian"
+    7. Click "Create Policy"
+5. Creating a Role for the Cloud9 EC2 Instance
+    1. Click "Create Role"
+    2. Under "Choose the service that will use this role, click "EC2" then "Next: Permissions"
+    3. In the "Filter Policies" searchbox, Enter "Cloud9RemediationTesting" then hit return.
+    4. Click the checkbox for the "Cloud9RemediationTesting" policy
+    5. Click "Next: Tags"
+    6. Click "Next: Review"
+    7. In "Role name", enter "Cloud9Instance"
+    8. Click "Create role"
+6. Creating a Role for the Cloud Custodian
+    1. Click "Create Role"
+    2. Under "Choose the service that will use this role, click "Lambda" then "Next: Permissions"
+    3. In the "Filter Policies" searchbox, Enter "CloudCustodian" then hit return.
+    4. Click the checkbox for the "CloudCustodian" policy
+    5. In the "Filter Policies" searchbox, Replace the text in the "Filter Policies" searchbox with "SecurityAudit".  
+    6. Click the checkbox next to "SecurityAudit", and if more than one appears, select the one with the AWS Managed Policies icon (an orange cube)
+    7. Click "Next: Tags"
+    5. Click "Next: Review"
+    6. In "Role name", enter "CloudCustodian"
+    7. Click "Create role" 
+    8. Click on the "CloudCustodian" role that was just created.
+    9. Click on the "Trust relationships" tab.
+    10. Click on "Edit trust relationship"
+    11. Replace the prepopulated text with the following, and replace the "{AWS_ACCOUNT_NUMBER}" with your AWS account id.  If 
 ```
 {
   "Version": "2012-10-17",
@@ -190,18 +190,18 @@ or be comfortable setting up a python3 environment with pip3, ssh, and any text 
   ]
 }
 ```
-3.4.12. Click "Update Trust Policy"
-4. Setup AWS credentials for the Cloud9 environment
-4.1. Open the EC2 Console - https://console.aws.amazon.com/ec2/v2/home?region=us-east-1#Home:
-4.2. Click "Instances"
-4.3. Click the checkbox for the instance name beginning with "aws-cloud9-SecHubWorkshop"
-4.4. Click the "Actions" button, then in the menu popup, click "Instance Settings", then "Attach/Replace IAM Role".
-4.5. In the "IAM role" box, select the "Cloud9Instance" role
-4.6. Click Apply.
-4.7. Open https://us-east-1.console.aws.amazon.com/cloud9/home?region=us-east-1
-4.8. In the box for "SecHubWorkshop", click "Open IDE"
-4.9. Within the Cloud9 browser tab, Click "File->New"
-4.10. Paste in the following text replacing "{AWS_ACCOUNT_NUMBER}" with your AWS account number
+    12. Click "Update Trust Policy"
+7. Setup AWS credentials for the Cloud9 environment
+    1. Open the EC2 Console - https://console.aws.amazon.com/ec2/v2/home?region=us-east-1#Home:
+    2. Click "Instances"
+    3. Click the checkbox for the instance name beginning with "aws-cloud9-SecHubWorkshop"
+    4. Click the "Actions" button, then in the menu popup, click "Instance Settings", then "Attach/Replace IAM Role".
+    5. In the "IAM role" box, select the "Cloud9Instance" role
+    6. Click Apply.
+    7. Open https://us-east-1.console.aws.amazon.com/cloud9/home?region=us-east-1
+    8. In the box for "SecHubWorkshop", click "Open IDE"
+    9. Within the Cloud9 browser tab, Click "File->New"
+    10. Paste in the following text replacing "{AWS_ACCOUNT_NUMBER}" with your AWS account number
 ```
 [profile cc]
 region = us-east-1
@@ -209,14 +209,14 @@ role_arn = arn:aws:iam::{AWS_ACCOUNT_NUMBER}:role/CloudCustodian
 credential_source = Ec2InstanceMetadata
 role_session_name = cloudcustodian-via-cli
 ```
-4.11. Click File->Save
-4.12. In Folder, enter "~/.aws".
-4.13. In Filename, enter "config"
-4.14. Click "Save"
-4.15. Test the AWS Credentials by finding the terminal session at the bottom which starts with "bash", then enter "aws s3 ls --profile cc"
-4.16. If you get AccessDenied, then review the trust policy and IAMProfile associated with the instance as you need to have working credentials for CloudCustodian to work.
-5. Install Cloud Custodian
-5.1. To install Cloud Custodian, just run the following in the bash terminal window of Cloud9:
+    11. Click File->Save
+    12. In Folder, enter "~/.aws".
+    13. In Filename, enter "config"
+    14. Click "Save"
+    15. Test the AWS Credentials by finding the terminal session at the bottom which starts with "bash", then enter "aws s3 ls --profile cc"
+    16. If you get AccessDenied, then review the trust policy and IAMProfile associated with the instance as you need to have working credentials for CloudCustodian to work.
+8. Install Cloud Custodian
+    1. To install Cloud Custodian, just run the following in the bash terminal window of Cloud9:
 ```
 python3 -m venv custodian
 source custodian/bin/activate
