@@ -20,6 +20,7 @@ In this workshop you will learn how to implement automated remediations of findi
 or be comfortable setting up a python3 environment with pip3, ssh, and any text editor.
 6. You should already have GuardDuty enabled on the account, if not follow https://docs.aws.amazon.com/guardduty/latest/ug/guardduty_settingup.html#guardduty_enable-gd 
 7. If any of your existing ec2 instances have their tag:Name=RemediationTestTarget then please rename them as instances with this value will be the target for actions during this workshop
+8. Resources will be created in the default vpc.  If you don't have a default vpc, you will need to modify the commands to specify the vpc you want to use.
 
 # Modules
 
@@ -44,32 +45,44 @@ or be comfortable setting up a python3 environment with pip3, ssh, and any text 
     "Version": "2012-10-17",
     "Statement": [
         {
+            "Sid": "VisualEditor0",
             "Effect": "Allow",
             "Action": [
-                "guardduty:CreateSampleFindings",
-                "ec2:RunInstances",
                 "ec2:StartInstance",
                 "ec2:DescribeInstances",
+                "guardduty:CreateSampleFindings",
+                "ec2:RunInstances",
                 "ec2:AssociateIamInstanceProfile"
             ],
             "Resource": "*"
         },
         {
-            "Sid": "PassRole",
+            "Sid": "VisualEditor1",
             "Effect": "Allow",
             "Action": [
-                "iam:PassRole"
+                "iam:PassRole",
+                "ssm:GetParameters"
             ],
             "Resource": [
-                "arn:aws:iam::369510138361:role/Cloud9Instance"
+                "arn:aws:iam::369510138361:role/Cloud9Instance",
+                "arn:aws:ssm:*:*:parameter/aws/service/ami-*"
             ]
         },
         {
+            "Sid": "VisualEditor2",
+            "Effect": "Allow",
+            "Action": "ssm:SendCommand",
+            "Resource": "arn:aws:ssm:*:*:document/AWS-*"
+        },
+        {
+            "Sid": "Logs",
             "Effect": "Allow",
             "Action": [
-                "ssm:GetParameters"
+                "logs:CreateLogStream",
+                "logs:CreateLogGroup",
+                "logs:PutLogEvents"
             ],
-            "Resource": "arn:aws:ssm:*:*:parameter/aws/service/ami-*"
+            "Resource": "arn:aws:logs:*:369510138361:log-group:/aws/ssm/AWS-RunShellScript*"
         }
     ]
 }
@@ -249,7 +262,8 @@ pip install c7n
 ```
 9. Setup an EC2 instance that will be the target of remediation actions 
 ```
-aws ec2 run-instances --image-id $(aws ssm get-parameters --names /aws/service/ami-amazon-linux-latest/amzn2-ami-minimal-hvm-x86_64-ebs --region us-east-1 --query 'Parameters[0].[Value]' --output text) --instance-type t2.micro --region us-east-1 --tag-specifications 'ResourceType=instance,Tags=[{Key=Name,Value=RemediationTestTarget}]' 
+aws ec2 create-security-group --group-name SecurityHubRemediationsTestTarget --description "SecurityHubRemediationsTestTarget" --vpc-id $(aws ec2 describe-vpcs --filters Name=isDefault,Values=true --query 'Vpcs[0].VpcId' --output text)
+aws ec2 run-instances --image-id $(aws ssm get-parameters --names /aws/service/ami-amazon-linux-latest/amzn2-ami-minimal-hvm-x86_64-ebs --region us-east-1 --query 'Parameters[0].[Value]' --output text) --instance-type t2.micro --region us-east-1 --tag-specifications 'ResourceType=instance,Tags=[{Key=Name,Value=RemediationTestTarget}]' --security-group-ids $(aws ec2 describe-security-groups --group-names SecurityHubRemediationsTestTarget --query SecurityGroups[0].GroupId --output text)
 ```
 10. Test first Cloud Custodian Policy, which reports that the instance created in the previous step has a vulnerability
     1. Run the following:
@@ -282,6 +296,14 @@ aws ec2 associate-iam-instance-profile --iam-instance-profile Name=Cloud9Instanc
 ```
 
 ## Module 3 - Automated Remediations - GuardDuty Event on EC2 Instance
+1. Run the following commands, the first deploys a Cloud Custodian policy which will be triggered when there are GuardDuty findings there are equal to or greater than medium and the EC2 instance has any vulnerability reported to SecurityHub, and the 2nd command simulates an GuardDuty finding.
+```
+custodian run -s /tmp --profile cc -c ~/environment/securityhub-remediations/module3/ec2-sechub-remediate-severity-with-findings.yml
+aws ssm send-command --document-name AWS-RunShellScript --parameters commands=["nslookup guarddutyc2activityb.com"] --targets Key=instanceids,Values=$(aws ec2 describe-instances --filters "Name=tag:Name,Values=RemediationTestTarget" --query Reservations[*].Instances[*].[InstanceId] --output text) --comment "Force GuardDutyFinding" --cloud-watch-output-config CloudWatchLogGroupName=/aws/ssm/AWS-RunShellScript,CloudWatchOutputEnabled=true
+
+```
+2.  https://console.aws.amazon.com/cloudwatch/home?region=us-east-1#logStream:group=/aws/lambda/custodian-ec2-sechub-remediate-severity-with-findings;streamFilter=typeLogStreamPrefix 
+
 
 ## Module 4 - Automated Remediations - GuardDuty Event on IAMUser
 
