@@ -215,7 +215,14 @@ role_session_name = cloudcustodian-via-cli
 4.13. In Filename, enter "config"
 4.14. Click "Save"
 4.15. Test the AWS Credentials by finding the terminal session at the bottom which starts with "bash", then enter "aws s3 ls --profile cc"
-6. Install Cloud Custodian
+4.16. If you get AccessDenied, then review the trust policy and IAMProfile associated with the instance as you need to have working credentials for CloudCustodian to work.
+5. Install Cloud Custodian
+5.1. To install Cloud Custodian, just run the following in the bash terminal window of Cloud9:
+```
+python3 -m venv custodian
+source custodian/bin/activate
+pip install c7n
+```
 7. Test Cloud Custodian
 
 ## Module 2 - Security Hub Custom Actions - Human initiated automation
