@@ -35,9 +35,9 @@ or be comfortable setting up a python3 environment with pip3, ssh, and any text 
     5. On the "Review" page, click "Create environment"
 3. Creating an IAM Policy for the Cloud9 EC2 Instance
     1. Open https://console.aws.amazon.com/iam/home?region=us-east-1#/policies
-    2. Click "Create policy"
-    3. Click the "JSON" tab
-    4. Replace the prepopulated text with the following:
+    1. Click "Create policy"
+    1. Click the "JSON" tab
+    1. Replace the prepopulated text with the following:
 ```json
 {
     "Version": "2012-10-17",
@@ -49,9 +49,10 @@ or be comfortable setting up a python3 environment with pip3, ssh, and any text 
         }
     ]
 }
-``` 5. Click "Review Policy"
-    6. In the Name field, enter "Cloud9RemediationTesting"
-    7. Click "Create Policy"
+``` 
+    1. Click "Review Policy"
+    1. In the Name field, enter "Cloud9RemediationTesting"
+    1. Click "Create Policy"
 4. Creating an IAM Policy for CloudCustodian 
     1. Click "Create policy"
     2. Click the "JSON" tab
