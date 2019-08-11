@@ -28,17 +28,17 @@ or be comfortable setting up a python3 environment with pip3, ssh, and any text 
 ## Module 1 - Environment Build and Configuration
 1. Enable Security Hub (if not already enabled - https://docs.aws.amazon.com/securityhub/latest/userguide/securityhub-settingup.html#securityhub-enable
 2. Create a Cloud9 Environment for this Workshop 
-2.1. Open https://us-east-1.console.aws.amazon.com/cloud9/home?region=us-east-1
-2.2. Click Create environment
-2.3. In the name field, type "SecHubWorkshop" then click "Next step"
-2.4. On the "Configure settings" page, click "Next step"
-2.5. On the "Review" page, click "Create environment"
+  1. Open https://us-east-1.console.aws.amazon.com/cloud9/home?region=us-east-1
+  2. Click Create environment
+  3. In the name field, type "SecHubWorkshop" then click "Next step"
+  4. On the "Configure settings" page, click "Next step"
+  5. On the "Review" page, click "Create environment"
 3. Create an IAM Policies and Roles
-3.1. Creating a policy for the Cloud9 EC2 Instance
-3.1.1. Open https://console.aws.amazon.com/iam/home?region=us-east-1#/policies
-3.1.2. Click "Create policy"
-3.1.3. Click the "JSON" tab
-3.1.4. Replace the prepopulated text with the following:
+  1. Creating a policy for the Cloud9 EC2 Instance
+    1. Open https://console.aws.amazon.com/iam/home?region=us-east-1#/policies
+    2. Click "Create policy"
+    3. Click the "JSON" tab
+    4. Replace the prepopulated text with the following:
 ```
 {
     "Version": "2012-10-17",
@@ -51,13 +51,13 @@ or be comfortable setting up a python3 environment with pip3, ssh, and any text 
     ]
 }
 ```
-3.1.5. Click "Review Policy"
-3.1.6. In the Name field, enter "Cloud9RemediationTesting"
-3.1.7. Click "Create Policy"
-3.2. Creating a policy for CloudCustodian 
-3.2.1. Click "Create policy"
-3.2.2. Click the "JSON" tab
-3.2.3. Replace the prepopulated text with the following:
+    5. Click "Review Policy"
+    6. In the Name field, enter "Cloud9RemediationTesting"
+    7. Click "Create Policy"
+  2. Creating a policy for CloudCustodian 
+    1. Click "Create policy"
+    2. Click the "JSON" tab
+    3. Replace the prepopulated text with the following:
 ```
 {
     "Version": "2012-10-17",
@@ -223,7 +223,6 @@ python3 -m venv custodian
 source custodian/bin/activate
 pip install c7n
 ```
-7. Test Cloud Custodian
 
 ## Module 2 - Security Hub Custom Actions - Human initiated automation
 
