@@ -28,17 +28,17 @@ or be comfortable setting up a python3 environment with pip3, ssh, and any text 
 ## Module 1 - Environment Build and Configuration
 1. Enable Security Hub (if not already enabled - https://docs.aws.amazon.com/securityhub/latest/userguide/securityhub-settingup.html#securityhub-enable
 2. Create a Cloud9 Environment for this Workshop 
-  1. Open https://us-east-1.console.aws.amazon.com/cloud9/home?region=us-east-1
-  2. Click Create environment
-  3. In the name field, type "SecHubWorkshop" then click "Next step"
-  4. On the "Configure settings" page, click "Next step"
-  5. On the "Review" page, click "Create environment"
+   1. Open https://us-east-1.console.aws.amazon.com/cloud9/home?region=us-east-1
+   2. Click Create environment
+   3. In the name field, type "SecHubWorkshop" then click "Next step"
+   4. On the "Configure settings" page, click "Next step"
+   5. On the "Review" page, click "Create environment"
 3. Create an IAM Policies and Roles
-  1. Creating a policy for the Cloud9 EC2 Instance
-    1. Open https://console.aws.amazon.com/iam/home?region=us-east-1#/policies
-    2. Click "Create policy"
-    3. Click the "JSON" tab
-    4. Replace the prepopulated text with the following:
+   1. Creating a policy for the Cloud9 EC2 Instance
+      1. Open https://console.aws.amazon.com/iam/home?region=us-east-1#/policies
+      2. Click "Create policy"
+      3. Click the "JSON" tab
+      4. Replace the prepopulated text with the following:
 ```
 {
     "Version": "2012-10-17",
@@ -51,13 +51,14 @@ or be comfortable setting up a python3 environment with pip3, ssh, and any text 
     ]
 }
 ```
-    5. Click "Review Policy"
-    6. In the Name field, enter "Cloud9RemediationTesting"
-    7. Click "Create Policy"
-  2. Creating a policy for CloudCustodian 
-    1. Click "Create policy"
-    2. Click the "JSON" tab
-    3. Replace the prepopulated text with the following:
+
+      5. Click "Review Policy"
+      6. In the Name field, enter "Cloud9RemediationTesting"
+      7. Click "Create Policy"
+   2. Creating a policy for CloudCustodian 
+      1. Click "Create policy"
+      2. Click the "JSON" tab
+      3. Replace the prepopulated text with the following:
 ```
 {
     "Version": "2012-10-17",
