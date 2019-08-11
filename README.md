@@ -49,8 +49,7 @@ or be comfortable setting up a python3 environment with pip3, ssh, and any text 
         }
     ]
 }
-```
-    5. Click "Review Policy"
+``` 5. Click "Review Policy"
     6. In the Name field, enter "Cloud9RemediationTesting"
     7. Click "Create Policy"
 4. Creating an IAM Policy for CloudCustodian 
