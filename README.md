@@ -184,15 +184,37 @@ or be comfortable setting up a python3 environment with pip3, ssh, and any text 
       "Effect": "Allow",
       "Principal": {
         "Service": "lambda.amazonaws.com",
-        "AWS": "arn:aws:iam::{AWS_ACCOUNT_NUMBER}:role/Cloud9RemediationTesting"
+        "AWS": "arn:aws:iam::{AWS_ACCOUNT_NUMBER}:role/Cloud9Instance"
       },
       "Action": "sts:AssumeRole"
     }
   ]
 }
 ```
-5. Setup AWS cli on Cloud9 environment
-5.1. metadata file
+3.4.12. Click "Update Trust Policy"
+4. Setup AWS credentials for the Cloud9 environment
+4.1. Open the EC2 Console - https://console.aws.amazon.com/ec2/v2/home?region=us-east-1#Home:
+4.2. Click "Instances"
+4.3. Click the checkbox for the instance name beginning with "aws-cloud9-SecHubWorkshop"
+4.4. Click the "Actions" button, then in the menu popup, click "Instance Settings", then "Attach/Replace IAM Role".
+4.5. In the "IAM role" box, select the "Cloud9Instance" role
+4.6. Click Apply.
+4.7. Open https://us-east-1.console.aws.amazon.com/cloud9/home?region=us-east-1
+4.8. In the box for "SecHubWorkshop", click "Open IDE"
+4.9. Within the Cloud9 browser tab, Click "File->New"
+4.10. Paste in the following text replacing "{AWS_ACCOUNT_NUMBER}" with your AWS account number
+```
+[profile cc]
+region = us-east-1
+role_arn = arn:aws:iam::{AWS_ACCOUNT_NUMBER}:role/CloudCustodian
+credential_source = Ec2InstanceMetadata
+role_session_name = cloudcustodian-via-cli
+```
+4.11. Click File->Save
+4.12. In Folder, enter "~/.aws".
+4.13. In Filename, enter "config"
+4.14. Click "Save"
+4.15. Test the AWS Credentials by finding the terminal session at the bottom which starts with "bash", then enter "aws s3 ls --profile cc"
 6. Install Cloud Custodian
 7. Test Cloud Custodian
 
