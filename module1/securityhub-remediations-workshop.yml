@@ -200,7 +200,9 @@ Resources:
       GroupDescription: "SecurityHub Remediation Test Target"
       GroupName: SecurityHubRemediationsTestTarget
       Tags: 
-        - Name: SecurityHubRemediationsTestTarget
+        - 
+          Key: "Name"
+          Value: "SecurityHubRemediationsTestTarget"
         
   RemediationTestTarget:
     Type: AWS::EC2::Instance
