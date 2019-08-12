@@ -210,5 +210,5 @@ Resources:
       Tags:
         - Name: "RemediationTestTarget"
       SecurityGroupIds:
-        - Ref: !RemediationTargetSG
+        - Ref: "RemediationTargetSG"
       IamInstanceProfile: !Ref: "Cloud9InstanceProfile"
