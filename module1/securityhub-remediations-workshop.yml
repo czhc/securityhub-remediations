@@ -1,5 +1,5 @@
 AWSTemplateFormatVersion: '2010-09-09'
-Description: 're:Invent 2016 Security Jam Challenge #4'
+Description: 'Security Hub Remediations Workshop - Base Environment'
 Parameters:
   LatestAmiId:
     Type: 'AWS::SSM::Parameter::Value<AWS::EC2::Image::Id>'
@@ -24,7 +24,7 @@ Resources:
         Statement: 
           -
             Effect: Allow
-            Action": 
+            Action: 
               - "ec2:StartInstance"
               - "ec2:Describe*"
               - "guardduty:CreateSampleFindings"
