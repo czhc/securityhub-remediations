@@ -56,20 +56,16 @@ role_session_name = cloudcustodian-via-cli
     13. In Filename, enter "config"
     14. Click "Save"
     15. Test the AWS Credentials by finding the terminal session at the bottom which starts with "bash", then enter "aws s3 ls --profile cc"
-    16. If you get AccessDenied, then review the trust policy and IAMProfile associated with the instance as you need to have working credentials for CloudCustodian to work.
-8. Install Cloud Custodian
+    16. Use the same terminal session to run: "git clone https://github.com/FireballDWF/securityhub-remediations.git && cd securityhub-remediations" so that you have a copy of the workshop files on your Cloud9 instance
+    17. If you get AccessDenied, then review the edits you made to ~/.aws/config and step 5 as you need to have working credentials for CloudCustodian to work.
+4. Install Cloud Custodian
     1. To install Cloud Custodian, just run the following in the bash terminal window of Cloud9:
 ```
 python3 -m venv custodian
 source custodian/bin/activate
 pip install c7n
 ```
-9. Setup an EC2 instance that will be the target of remediation actions 
-```
-aws ec2 create-security-group --group-name SecurityHubRemediationsTestTarget --description "SecurityHubRemediationsTestTarget" --vpc-id $(aws ec2 describe-vpcs --filters Name=isDefault,Values=true --query 'Vpcs[0].VpcId' --output text)
-aws ec2 run-instances --image-id $(aws ssm get-parameters --names /aws/service/ami-amazon-linux-latest/amzn2-ami-hvm-x86_64-gp2 --region us-east-1 --query 'Parameters[0].[Value]' --output text) --instance-type t2.micro --region us-east-1 --tag-specifications 'ResourceType=instance,Tags=[{Key=Name,Value=RemediationTestTarget}]' --security-group-ids $(aws ec2 describe-security-groups --group-names SecurityHubRemediationsTestTarget --query SecurityGroups[0].GroupId --output text) --iam-instance-profile Name=Cloud9Instance
-```
-10. Test first Cloud Custodian Policy, which reports that the instance created in the previous step has a vulnerability
+5. Test first Cloud Custodian Policy, which reports that the instance created in the previous step has a vulnerability
     1. Run the following:
 ```
 custodian run -s /tmp --profile cc -c ~/environment/securityhub-remediations/module1/force-vulnerability-finding.yml
@@ -114,9 +110,12 @@ custodian run -s /tmp --profile cc -c ~/environment/securityhub-remediations/mod
 custodian run -s /tmp --profile cc -c ~/environment/securityhub-remediations/module1/force-vulnerability-finding.yml
 ```
 2. 
+
 ## Module 5 - Automated Remediations - GuardDuty Event on IAMUser
+Work In Progress
+
 
 ## Module 6 - Automated Remediations - GuardDuty Event on EC2 Instance - Isolate rather than Stop
-
+Work In Progress
 
 
