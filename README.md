@@ -21,170 +21,22 @@ or be comfortable setting up a python3 environment with pip3, ssh, and any text 
 6. You should already have GuardDuty enabled on the account, if not follow https://docs.aws.amazon.com/guardduty/latest/ug/guardduty_settingup.html#guardduty_enable-gd 
 7. If any of your existing ec2 instances have their tag:Name=RemediationTestTarget then please rename them as instances with this value will be the target for actions during this workshop
 8. Resources will be created in the default vpc.  If you don't have a default vpc, you will need to modify the commands to specify the vpc you want to use.
+9. A git client to download the workshop files
 
 # Modules
 
-1. {replace with final model names}
+1. {TODO: replace with final model names}
 
 
 ## Module 1 - Environment Build and Configuration
+0. Run "git clone https://github.com/FireballDWF/securityhub-remediations.git && cd securityhub-remediations"
 1. Enable Security Hub (if not already enabled - https://docs.aws.amazon.com/securityhub/latest/userguide/securityhub-settingup.html#securityhub-enable
-2. Create a Cloud9 Environment for this Workshop 
-    1. Open https://us-east-1.console.aws.amazon.com/cloud9/home?region=us-east-1
-    2. Click Create environment
-    3. In the name field, type "SecHubWorkshop" then click "Next step"
-    4. On the "Configure settings" page, click "Next step"
-    5. On the "Review" page, click "Create environment"
+2. Launch cloudformation to setup the environment
+    1. aws cloudformation create-stack --stack-name "SecurityGubRemediationsWorkshop" --template-body file://module1/securityhub-remediations-workshop.yml --capabilities CAPABILITY_IAM
 3. Creating an IAM Policy for the Cloud9 EC2 Instance
-    1. Open https://console.aws.amazon.com/iam/home?region=us-east-1#/policies
-    2. Click "Create policy"
-    3. Click the "JSON" tab
-    4. Replace the prepopulated text with the following:
-```json
-{
-    "Version": "2012-10-17",
-    "Statement": [
-        {
-            "Sid": "VisualEditor0",
-            "Effect": "Allow",
-            "Action": [
-                "ec2:StartInstance",
-                "ec2:DescribeInstances",
-                "guardduty:CreateSampleFindings",
-                "ec2:RunInstances",
-                "ec2:AssociateIamInstanceProfile"
-            ],
-            "Resource": "*"
-        },
-        {
-            "Sid": "VisualEditor1",
-            "Effect": "Allow",
-            "Action": [
-                "iam:PassRole",
-                "ssm:GetParameters"
-            ],
-            "Resource": [
-                "arn:aws:iam::369510138361:role/Cloud9Instance",
-                "arn:aws:ssm:*:*:parameter/aws/service/ami-*"
-            ]
-        },
-        {
-            "Sid": "VisualEditor2",
-            "Effect": "Allow",
-            "Action": "ssm:SendCommand",
-            "Resource": "arn:aws:ssm:*:*:document/AWS-*"
-        },
-        {
-            "Sid": "Logs",
-            "Effect": "Allow",
-            "Action": [
-                "logs:CreateLogStream",
-                "logs:CreateLogGroup",
-                "logs:PutLogEvents"
-            ],
-            "Resource": "arn:aws:logs:*:369510138361:log-group:/aws/ssm/AWS-RunShellScript*"
-        }
-    ]
-}
-``` 
-    5. Click "Review Policy"
-    6. In the Name field, enter "Cloud9RemediationTesting"
-    7. Click "Create Policy"
+    1. Run: "aws iam create-policy —policy-name C —policy-document file://module1/cloud9remediationtesting.json
 4. Creating an IAM Policy for CloudCustodian 
-    1. Click "Create policy"
-    2. Click the "JSON" tab
-    3. Replace the prepopulated text with the following:
-```json
-{
-    "Version": "2012-10-17",
-    "Statement": [
-        {
-            "Sid": "CCWrite",
-            "Effect": "Allow",
-            "Action": [
-                "ssm:SendCommand",
-                "ssm:CreateOpsItem",
-                "iam:DeleteAccessKey",
-                "iam:UpdateAccessKey",
-                "iam:Tag*",
-                "iam:UnTag*",
-                "kms:UntagResource",
-                "kms:TagResource",
-                "events:PutRule",
-                "events:PutTargets",
-                "ec2:CreateImage",
-                "ec2:CreateSnapshot*",
-                "ec2:CreateTags",
-                "ec2:DeleteTags",
-                "ec2:ModifyVpcAttribute",
-                "ec2:ModifyInstanceAttribute",
-                "ec2:AssociateIamInstanceProfile",
-                "ec2:DisassociateIamInstanceProfile",
-                "ec2:StopInstances",
-                "ec2:TerminateInstances",
-                "config:PutEvaluations",
-                "s3:PutBucketTagging",
-                "tag:TagResources",
-                "tag:UntagResources"
-            ],
-            "Resource": "*"
-        },
-        {
-            "Sid": "CCDeployLambdas",
-            "Effect": "Allow",
-            "Action": [
-                "lambda:CreateFunction",
-                "lambda:TagResource",
-                "lambda:InvokeFunction",
-                "lambda:UpdateFunctionConfiguration",
-                "lambda:UntagResource",
-                "lambda:UpdateAlias",
-                "lambda:UpdateFunctionCode",
-                "lambda:AddPermission",
-                "lambda:DeleteFunction",
-                "lambda:RemovePermission",
-                "lambda:CreateAlias",
-                "lambda:GetFunction"
-            ],
-            "Resource": [
-                "arn:aws:lambda:*:{AWS_ACCOUNT_NUMBER}:function:custodian-*"
-            ]
-        },
-        {
-            "Sid": "CCPassRole",
-            "Effect": "Allow",
-            "Action": [
-                "iam:PassRole"
-            ],
-            "Resource": [
-                "arn:aws:iam::{AWS_ACCOUNT_NUMBER}:role/CloudCustodian"
-            ]
-        },
-        {
-            "Sid": "CCSecurityHub",
-            "Effect": "Allow",
-            "Action": [
-                "securityhub:UpdateFindings",
-                "securityhub:BatchImportFindings",
-                "securityhub:CreateActionTarget",
-                "securityhub:UpdateActionTarget",
-                "securityhub:Describe*"
-            ],
-            "Resource": "*"
-        },
-        {
-            "Sid": "CCLogs",
-            "Effect": "Allow",
-            "Action": [
-                "logs:CreateLogStream",
-                "logs:CreateLogGroup",
-                "logs:PutLogEvents"
-            ],
-            "Resource": "arn:aws:logs:*:{AWS_ACCOUNT_NUMBER}:log-group:/aws/lambda/custodian-*"
-        }
-    ]
-}
-```
+    1. Replace accountRun: "sed"
     4. Replace "{AWS_ACCOUNT_NUMBER}" with your AWS Account number, otherwise you will get validation errors on the next step.
     5. Click "Review Policy"
     6. In the Name field, enter "CloudCustodian"
@@ -193,7 +45,7 @@ or be comfortable setting up a python3 environment with pip3, ssh, and any text 
     1. Click "Create Role"
     2. Under "Choose the service that will use this role, click "EC2" then "Next: Permissions"
     3. In the "Filter Policies" searchbox, Enter "Cloud9RemediationTesting" then hit return.
-    4. Click the checkbox for the "Cloud9RemediationTesting" policy
+    4. Click the checkbox for the "" policy
     5. Click "Next: Tags"
     6. Click "Next: Review"
     7. In "Role name", enter "Cloud9Instance"
@@ -306,7 +158,7 @@ aws ssm send-command --document-name AWS-RunShellScript --parameters commands=["
 ## Module 4 - Automated Remediations - Vulnerability Event on EC2 Instance with Very Risky Configuration
 1. Run the following commands:
 ```
-custodian run -s /tmp --profile cc -c ec2-public-ingress-hubfinding.yml
+custodian run -s /tmp --profile cc -c ~/environment/securityhub-remediations/module4/ec2-public-ingress-hubfinding.yml
 custodian run -s /tmp --profile cc -c ~/environment/securityhub-remediations/module1/force-vulnerability-finding.yml
 ```
 2. 

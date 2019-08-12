@@ -1,0 +1,72 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: 're:Invent 2016 Security Jam Challenge #4'
+Parameters:
+  LatestAmiId:
+    Type: 'AWS::SSM::Parameter::Value<AWS::EC2::Image::Id>'
+    Default: '/aws/service/ami-amazon-linux-latest/amzn2-ami-hvm-x86_64-gp2'
+
+Resources:
+  SecHubWorkshopEnv:
+    Type: AWS::Cloud9::EnvironmentEC2
+    Properties: 
+      Description: Security Hub Remediations Workshop
+      InstanceType: t2.micro
+      Name: SecHubWorkshop
+  
+  Cloud9InstancePolicy:
+    Type: AWS::IAM::Policy
+    Properties: 
+      PolicyName: Cloud9RemediationTesting
+      Roles: 
+        - Cloud9RemediationTesting
+      PolicyDocument: 
+        Version": "2012-10-17",
+        Statement": 
+          -
+            Effect: Allow
+            Action": 
+              - "ec2:StartInstance"
+              - "ec2:Describe*"
+              - "guardduty:CreateSampleFindings"
+            Resource: "*"
+          -    
+            Effect: Allow
+            Action: 
+              - "logs:CreateLogStream"
+              - "logs:CreateLogGroup"
+              - "logs:PutLogEvents"
+            Resource: !Sub 'arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/ssm/AWS-RunShellScript*'
+          -
+            Effect: Allow
+            Action: 
+              - "ssm:SendCommand"
+              - "ssm:DescribeAssociation"
+              - "ssm:GetDeployablePatchSnapshotForInstance"
+              - "ssm:GetDocument"
+              - "ssm:DescribeDocument"
+              - "ssm:GetManifest"
+              - "ssm:GetParameters"
+              - "ssm:ListAssociations"
+              - "ssm:ListInstanceAssociations"
+              - "ssm:PutInventory"
+              - "ssm:PutComplianceItems"
+              - "ssm:PutConfigurePackageResult"
+              - "ssm:StartAutomationExecution"
+              - "ssm:UpdateAssociationStatus"
+              - "ssm:UpdateInstanceAssociationStatus"
+              - "ssm:UpdateInstanceInformation"
+            Resource: "*"
+          -
+            Effect: Allow
+            Action:
+              - "ssmmessages:CreateControlChannel"
+              - "ssmmessages:CreateDataChannel"
+              - "ssmmessages:OpenControlChannel"
+              - "ssmmessages:OpenDataChannel"
+              - "ec2messages:AcknowledgeMessage",
+              - "ec2messages:DeleteMessage",
+              - "ec2messages:FailMessage",
+              - "ec2messages:GetEndpoint",
+              - "ec2messages:GetMessages",
+              - "ec2messages:SendReply"
+            Resource: "*"
