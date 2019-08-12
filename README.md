@@ -306,8 +306,10 @@ aws ssm send-command --document-name AWS-RunShellScript --parameters commands=["
 ## Module 4 - Automated Remediations - Vulnerability Event on EC2 Instance with Very Risky Configuration
 1. Run the following commands:
 ```
+custodian run -s /tmp --profile cc -c ec2-public-ingress-hubfinding.yml
+custodian run -s /tmp --profile cc -c ~/environment/securityhub-remediations/module1/force-vulnerability-finding.yml
 ```
-
+2. 
 ## Module 5 - Automated Remediations - GuardDuty Event on IAMUser
 
 ## Module 6 - Automated Remediations - GuardDuty Event on EC2 Instance - Isolate rather than Stop

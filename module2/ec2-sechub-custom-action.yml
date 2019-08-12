@@ -1,0 +1,17 @@
+policies:
+  - name: DenySnapStop
+    resource: ec2
+    description: Deny all access by removing Instance Profile, Stop the Instance
+    mode:
+        type: hub-action
+        role: arn:aws:iam::{account_id}:role/CloudCustodian
+        packages: [botocore, boto3, urllib3]
+        memory: 128
+    actions:
+        # Disassociate instance profile by not setting a name, thus any api attempts from instance will get implicit denies
+      - type: set-instance-profile
+        # snapshot the disk for forensics
+      - type: snapshot
+        copy-tags: [Name]
+        # stop the instance
+      - stop

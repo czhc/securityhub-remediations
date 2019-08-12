@@ -1,0 +1,41 @@
+policies:
+  - name: ec2-sechub-remediate-severity-with-findings
+    resource: ec2
+    mode:
+        type: hub-finding
+        role: arn:aws:iam::{account_id}:role/CloudCustodian
+        packages: [botocore, boto3, urllib3]
+    filters:
+      - type: event
+        key: detail.findings[].ProductFields.aws/securityhub/ProductName
+        value: GuardDuty
+      - type: event
+        key: detail.findings[].Resources[].Type
+        value: AwsEc2Instance 
+      # Filter for medium and high severity events from GuardDuty
+      - type: event
+        key: detail.severity
+        op: gte
+        value: 31
+      - type: value
+        key: tag:Name
+        value: RemediationTestTarget
+      - type: finding
+        query: 
+          Type:
+            - Value: Software and Configuration Checks/Vulnerabilities"
+              Comparison: EQUALS
+    actions:
+      - type: set-instance-profile
+        # snapshot the disk for forensics
+      - type: snapshot
+        copy-tags: [Name]
+        # stop the instance
+      - stop
+
+
+
+# Test Hint
+# The following one can be target to our target instance, but there is a long delay, so won't be used during workshop
+# aws ssm send-command --document-name AWS-RunShellScript --parameters commands=["nslookup guarddutyc2activityb.com"] --targets "Key=Tag:Name,Values=RemediationTestTarget" --comment "Force GuardDutyFinding"
+# aws ssm send-command --document-name AWS-RunShellScript --parameters commands=["nslookup guarddutyc2activityb.com"] ----instance-ids  --comment "Force GuardDutyFinding" --cloud-watch-output-config CloudWatchLogGroupName=/aws/ssm/AWS-RunShellScript,CloudWatchOutputEnabled=true

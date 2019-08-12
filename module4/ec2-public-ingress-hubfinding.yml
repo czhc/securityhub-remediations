@@ -1,0 +1,36 @@
+policies:
+  - name: ec2-public-ingress-hubfinding
+    description: filters for ec2 instances with security-groups with ingress rule allowing public access
+    resource: ec2
+    mode:
+        type: hub-finding
+        role: arn:aws:iam::{account_id}:role/CloudCustodian
+        memory: 128
+        packages: [botocore, boto3, urllib3]
+    filters:
+      - type: event
+        key: detail.findings[0].Resources[0].Type
+        value: AwsEc2Instance 
+      - type: value
+        key: PublicIpAddress
+        value: not-null
+      - type: value
+        key: IamInstanceProfile
+        value: not-null
+      # describe level data does not appear to be available
+      - type: security-group
+        key: IpPermissions[].IpRanges[].CidrIp
+        value_type: swap
+        op: in
+        value: "0.0.0.0/0" # anywhere
+      - type: check-permissions
+        match: allowed
+        actions:
+        - s3:GetObject
+    actions:
+      - type: set-instance-profile
+        # snapshot the disk for forensics
+      - type: snapshot
+        copy-tags: [Name]
+        # stop the instance
+      - stop
