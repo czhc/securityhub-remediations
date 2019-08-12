@@ -167,12 +167,11 @@ Resources:
                 - "ec2.amazonaws.com" 
             Action: 
               - "sts:AssumeRole"
-     Path: "/"
+      Path: "/"
 
   Cloud9InstanceProfile:
-   Type: "AWS::IAM::InstanceProfile"
-   Properties:
-     Path: "/"
-     Roles:
-       -
-         Ref: "Cloud9Instance"
+    Type: "AWS::IAM::InstanceProfile"
+    Properties:
+      Path: "/"
+      Roles:
+        - Ref: "Cloud9Instance"
