@@ -194,3 +194,21 @@ Resources:
       ManagedPolicyArns: 
         - "arn:aws:iam::aws:policy/SecurityAudit"
       Path: "/"
+  RemediationTargetSG:
+    Type: AWS::EC2::SecurityGroup
+    Properties: 
+      GroupDescription: "SecurityHub Remediation Test Target"
+      GroupName: SecurityHubRemediationsTestTarget
+      Tags: 
+        - Name: SecurityHubRemediationsTestTarget
+        
+  RemediationTestTarget:
+    Type: AWS::EC2::Instance
+    Properties:
+      ImageId: !Ref "LatestAmiId" 
+      InstanceType: "t2.micro"
+      Tags:
+        - Name: "RemediationTestTarget"
+      SecurityGroupIds:
+        - Ref: !RemediationTargetSG
+      IamInstanceProfile: !Ref: "Cloud9InstanceProfile"
