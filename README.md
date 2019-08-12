@@ -42,21 +42,14 @@ or be comfortable setting up a python3 environment with pip3, ssh, and any text 
     6. Click Apply.
     7. Open https://us-east-1.console.aws.amazon.com/cloud9/home?region=us-east-1
     8. In the box for "SecHubWorkshop", click "Open IDE"
-    9. Within the Cloud9 browser tab, Click "File->New"
-    10. Paste in the following text replacing "{AWS_ACCOUNT_NUMBER}" with your AWS account number
-```
-[profile cc]
-region = us-east-1
-role_arn = arn:aws:iam::{AWS_ACCOUNT_NUMBER}:role/CloudCustodian
-credential_source = Ec2InstanceMetadata
-role_session_name = cloudcustodian-via-cli
-```
-    11. Click File->Save
-    12. In Folder, enter "~/.aws".
-    13. In Filename, enter "config"
-    14. Click "Save"
-    15. Test the AWS Credentials by finding the terminal session at the bottom which starts with "bash", then enter "aws s3 ls --profile cc"
-    16. Use the same terminal session to run: "git clone https://github.com/FireballDWF/securityhub-remediations.git && cd securityhub-remediations" so that you have a copy of the workshop files on your Cloud9 instance
+    9. Find the terminal session at the bottom which starts with "bash" and use it to run: "git clone https://github.com/FireballDWF/securityhub-remediations.git && cd securityhub-remediations" so that you have a copy of the workshop files on your Cloud9 instance
+    10. Within the Cloud9 browser tab, open the file securityhub-remediations/module1/config
+    11. Replace "{AWS_ACCOUNT_NUMBER}" with your AWS account number
+    12. Click File->Save
+    13. In Folder, enter "~/.aws".
+    14. In Filename, enter "config"
+    15. Click "Save"
+    16. Test the AWS Credentials by going to the IDE's terminal window then enter "aws s3 ls --profile cc"
     17. If you get AccessDenied, then review the edits you made to ~/.aws/config and step 5 as you need to have working credentials for CloudCustodian to work.
 4. Install Cloud Custodian
     1. To install Cloud Custodian, just run the following in the bash terminal window of Cloud9:
