@@ -33,12 +33,7 @@ or be comfortable setting up a python3 environment with pip3, ssh, and any text 
 1. Enable Security Hub (if not already enabled - https://docs.aws.amazon.com/securityhub/latest/userguide/securityhub-settingup.html#securityhub-enable
 2. Launch cloudformation to setup the environment
     1. aws cloudformation create-stack --stack-name "SecurityGubRemediationsWorkshop" --template-body file://module1/securityhub-remediations-workshop.yml --capabilities CAPABILITY_IAM
-4. Creating an IAM Policy for CloudCustodian 
-    1. Replace accountRun: "sed"
-    4. Replace "{AWS_ACCOUNT_NUMBER}" with your AWS Account number, otherwise you will get validation errors on the next step.
-    5. Click "Review Policy"
-    6. In the Name field, enter "CloudCustodian"
-    7. Click "Create Policy"
+
 5. Creating a Role for the Cloud9 EC2 Instance
     1. Click "Create Role"
     2. Under "Choose the service that will use this role, click "EC2" then "Next: Permissions"

@@ -18,7 +18,7 @@ Resources:
     Properties: 
       PolicyName: Cloud9RemediationTesting
       Roles: 
-        - Cloud9RemediationTesting
+        - Ref "Cloud9Instance"
       PolicyDocument: 
         Version: "2012-10-17"
         Statement: 
@@ -70,3 +70,109 @@ Resources:
               - "ec2messages:GetMessages"
               - "ec2messages:SendReply"
             Resource: "*"
+
+  CloudCustodianPolicy:
+    Type: AWS::IAM::Policy
+    Properties: 
+      PolicyName: CloudCustodian
+      Roles: 
+        - Ref: "CloudCustodian"
+      PolicyDocument: 
+        Version: "2012-10-17"
+        Statement: 
+          -
+            Sid": "CCWrite"
+            Effect: Allow
+            Action: 
+              - "ssm:SendCommand"
+              - "ssm:CreateOpsItem"
+              - "iam:DeleteAccessKey"
+              - "iam:UpdateAccessKey"
+              - "iam:Tag*"
+              - "iam:UnTag*"
+              - "kms:UntagResource"
+              - "kms:TagResource"
+              - "events:PutRule"
+              - "events:PutTargets"
+              - "ec2:CreateImage"
+              - "ec2:CreateSnapshot*"
+              - "ec2:CreateTags"
+              - "ec2:DeleteTags"
+              - "ec2:ModifyVpcAttribute"
+              - "ec2:ModifyInstanceAttribute"
+              - "ec2:AssociateIamInstanceProfile"
+              - "ec2:DisassociateIamInstanceProfile"
+              - "ec2:StopInstances"
+              - "ec2:TerminateInstances"
+              - "config:PutEvaluations"
+              - "s3:PutBucketTagging"
+              - "tag:TagResources"
+              - "tag:UntagResources"
+            Resource: "*"
+          -
+            Sid: "CCDeployLambdas"
+            Effect: Allow"
+            Action: 
+              - "lambda:CreateFunction"
+              - "lambda:TagResource"
+              - "lambda:InvokeFunction"
+              - "lambda:UpdateFunctionConfiguration"
+              - "lambda:UntagResource"
+              - "lambda:UpdateAlias"
+              - "lambda:UpdateFunctionCode"
+              - "lambda:AddPermission"
+              - "lambda:DeleteFunction"
+              - "lambda:RemovePermission"
+              - "lambda:CreateAlias"
+              - "lambda:GetFunction"
+            Resource:
+              - !Sub 'arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:custodian-*'
+          -
+            Sid: "CCPassRole"
+            Effect: Allow
+            Action:
+              - "iam:PassRole"
+            Resource:
+              - !Sub 'arn:aws:iam::${AWS::AccountId}:role/CloudCustodian'
+          -
+            Sid: "CCSecurityHub"
+            Effect: "Allow"
+            Action:
+              - "securityhub:UpdateFindings"
+              - "securityhub:BatchImportFindings"
+              - "securityhub:CreateActionTarget"
+              - "securityhub:UpdateActionTarget"
+              - "securityhub:Describe*"
+            Resource: "*"
+          -
+            Sid: "CCLogs"
+            Effect: "Allow"
+            Action: 
+              - "logs:CreateLogStream"
+              - "logs:CreateLogGroup"
+              - "logs:PutLogEvents"
+            Resource: 
+              - !Sub 'arn:aws:logs::${AWS::AccountId}:log-group:/aws/lambda/custodian-*'
+  
+  Cloud9Instance:            
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          -
+            Effect: "Allow"
+            Principal:
+              Service:
+                - "ec2.amazonaws.com" 
+            Action: 
+              - "sts:AssumeRole"
+     Path: "/"
+
+  Cloud9InstanceProfile:
+   Type: "AWS::IAM::InstanceProfile"
+   Properties:
+     Path: "/"
+     Roles:
+       -
+         Ref: "Cloud9Instance"
