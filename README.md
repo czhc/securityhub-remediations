@@ -33,48 +33,7 @@ or be comfortable setting up a python3 environment with pip3, ssh, and any text 
 1. Enable Security Hub (if not already enabled - https://docs.aws.amazon.com/securityhub/latest/userguide/securityhub-settingup.html#securityhub-enable
 2. Launch cloudformation to setup the environment
     1. aws cloudformation create-stack --stack-name "SecurityGubRemediationsWorkshop" --template-body file://module1/securityhub-remediations-workshop.yml --capabilities CAPABILITY_IAM
-
-5. Creating a Role for the Cloud9 EC2 Instance
-    1. Click "Create Role"
-    2. Under "Choose the service that will use this role, click "EC2" then "Next: Permissions"
-    3. In the "Filter Policies" searchbox, Enter "Cloud9RemediationTesting" then hit return.
-    4. Click the checkbox for the "" policy
-    5. Click "Next: Tags"
-    6. Click "Next: Review"
-    7. In "Role name", enter "Cloud9Instance"
-    8. Click "Create role"
-6. Creating a Role for the Cloud Custodian
-    1. Click "Create Role"
-    2. Under "Choose the service that will use this role, click "Lambda" then "Next: Permissions"
-    3. In the "Filter Policies" searchbox, Enter "CloudCustodian" then hit return.
-    4. Click the checkbox for the "CloudCustodian" policy
-    5. In the "Filter Policies" searchbox, Replace the text in the "Filter Policies" searchbox with "SecurityAudit".  
-    6. Click the checkbox next to "SecurityAudit", and if more than one appears, select the one with the AWS Managed Policies icon (an orange cube)
-    7. Click "Next: Tags"
-    5. Click "Next: Review"
-    6. In "Role name", enter "CloudCustodian"
-    7. Click "Create role" 
-    8. Click on the "CloudCustodian" role that was just created.
-    9. Click on the "Trust relationships" tab.
-    10. Click on "Edit trust relationship"
-    11. Replace the prepopulated text with the following, and replace the "{AWS_ACCOUNT_NUMBER}" with your AWS account id.  If 
-```json
-{
-  "Version": "2012-10-17",
-  "Statement": [
-    {
-      "Effect": "Allow",
-      "Principal": {
-        "Service": "lambda.amazonaws.com",
-        "AWS": "arn:aws:iam::{AWS_ACCOUNT_NUMBER}:role/Cloud9Instance"
-      },
-      "Action": "sts:AssumeRole"
-    }
-  ]
-}
-```
-    12. Click "Update Trust Policy"
-7. Setup AWS credentials for the Cloud9 environment
+3. Setup AWS credentials for the Cloud9 environment
     1. Open the EC2 Console - https://console.aws.amazon.com/ec2/v2/home?region=us-east-1#Home:
     2. Click "Instances"
     3. Click the checkbox for the instance name beginning with "aws-cloud9-SecHubWorkshop"

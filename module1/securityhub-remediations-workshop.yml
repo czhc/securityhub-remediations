@@ -175,3 +175,22 @@ Resources:
       Path: "/"
       Roles:
         - Ref: "Cloud9Instance"
+
+  CloudCustodian:            
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          -
+            Effect: "Allow"
+            Principal:
+              Service:
+                - "lambda.amazonaws.com" 
+              AWS: 
+                - "arn:aws:iam::${AWS::AccountId}:role/Cloud9Instance"
+            Action: 
+              - "sts:AssumeRole"
+      ManagedPolicyArns: 
+        - "arn:aws:iam::aws:policy/SecurityAudit"
+      Path: "/"
