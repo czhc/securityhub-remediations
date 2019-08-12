@@ -263,7 +263,7 @@ pip install c7n
 9. Setup an EC2 instance that will be the target of remediation actions 
 ```
 aws ec2 create-security-group --group-name SecurityHubRemediationsTestTarget --description "SecurityHubRemediationsTestTarget" --vpc-id $(aws ec2 describe-vpcs --filters Name=isDefault,Values=true --query 'Vpcs[0].VpcId' --output text)
-aws ec2 run-instances --image-id $(aws ssm get-parameters --names /aws/service/ami-amazon-linux-latest/amzn2-ami-minimal-hvm-x86_64-ebs --region us-east-1 --query 'Parameters[0].[Value]' --output text) --instance-type t2.micro --region us-east-1 --tag-specifications 'ResourceType=instance,Tags=[{Key=Name,Value=RemediationTestTarget}]' --security-group-ids $(aws ec2 describe-security-groups --group-names SecurityHubRemediationsTestTarget --query SecurityGroups[0].GroupId --output text)
+aws ec2 run-instances --image-id $(aws ssm get-parameters --names /aws/service/ami-amazon-linux-latest/amzn2-ami-hvm-x86_64-gp2 --region us-east-1 --query 'Parameters[0].[Value]' --output text) --instance-type t2.micro --region us-east-1 --tag-specifications 'ResourceType=instance,Tags=[{Key=Name,Value=RemediationTestTarget}]' --security-group-ids $(aws ec2 describe-security-groups --group-names SecurityHubRemediationsTestTarget --query SecurityGroups[0].GroupId --output text) --iam-instance-profile Name=Cloud9Instance
 ```
 10. Test first Cloud Custodian Policy, which reports that the instance created in the previous step has a vulnerability
     1. Run the following:
@@ -295,19 +295,22 @@ aws ec2 start-instances --instance-ids $(aws ec2 describe-instances --filters "N
 aws ec2 associate-iam-instance-profile --iam-instance-profile Name=Cloud9Instance --instance-id $(aws ec2 describe-instances --filters "Name=tag:Name,Values=RemediationTestTarget" --query Reservations[*].Instances[*].[InstanceId] --output text)
 ```
 
-## Module 3 - Automated Remediations - GuardDuty Event on EC2 Instance
+## Module 3 - Automated Remediations - GuardDuty DNS Event on EC2 Instance
 1. Run the following commands, the first deploys a Cloud Custodian policy which will be triggered when there are GuardDuty findings there are equal to or greater than medium and the EC2 instance has any vulnerability reported to SecurityHub, and the 2nd command simulates an GuardDuty finding.
 ```
 custodian run -s /tmp --profile cc -c ~/environment/securityhub-remediations/module3/ec2-sechub-remediate-severity-with-findings.yml
-aws ssm send-command --document-name AWS-RunShellScript --parameters commands=["nslookup guarddutyc2activityb.com"] --targets Key=instanceids,Values=$(aws ec2 describe-instances --filters "Name=tag:Name,Values=RemediationTestTarget" --query Reservations[*].Instances[*].[InstanceId] --output text) --comment "Force GuardDutyFinding" --cloud-watch-output-config CloudWatchLogGroupName=/aws/ssm/AWS-RunShellScript,CloudWatchOutputEnabled=true
-
+aws ssm send-command --document-name AWS-RunShellScript --parameters commands=["nslookup guarddutyc2activityb.com"] --targets "Key=tag:Name,Values=RemediationTestTarget" --comment "Force GuardDutyFinding" --cloud-watch-output-config CloudWatchLogGroupName=/aws/ssm/AWS-RunShellScript,CloudWatchOutputEnabled=true
 ```
 2.  https://console.aws.amazon.com/cloudwatch/home?region=us-east-1#logStream:group=/aws/lambda/custodian-ec2-sechub-remediate-severity-with-findings;streamFilter=typeLogStreamPrefix 
 
+## Module 4 - Automated Remediations - Vulnerability Event on EC2 Instance with Very Risky Configuration
+1. Run the following commands:
+```
+```
 
-## Module 4 - Automated Remediations - GuardDuty Event on IAMUser
+## Module 5 - Automated Remediations - GuardDuty Event on IAMUser
 
-## Module 5 - Automated Remediations - GuardDuty Event on EC2 Instance - Isolate rather than Stop
+## Module 6 - Automated Remediations - GuardDuty Event on EC2 Instance - Isolate rather than Stop
 
 
 
