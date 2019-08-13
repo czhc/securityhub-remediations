@@ -33,9 +33,10 @@ policies:
             actions:
             - s3:*    
     actions:
-      - type: set-instance-profile
-        # snapshot the disk for forensics
+      # snapshot the disk for forensics
       - type: snapshot
         copy-tags: [Name]
-        # stop the instance
+      # Remove priviledges from the instance
+      - type: set-instance-profile
+      # stop the instance
       #- stop
