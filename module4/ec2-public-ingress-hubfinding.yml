@@ -33,10 +33,15 @@ policies:
             actions:
             - s3:*    
     actions:
+      # Enable termination protection - Enhancement request
       # snapshot the disk for forensics
       - type: snapshot
         copy-tags: [Name]
+      # Add forensic SG for responser ingress to trusted network source
+      # - modify-security-groups action to be added in future version of this workshop
+      # Grab memory if have ssh or SSM
+      # - invoke-sfn action to be added in future version of this workshop
       # Remove priviledges from the instance
       - type: set-instance-profile
-      # stop the instance
-      #- stop
+      # remove from any ASG or clustering - Enhancement request (at least for ASG.  Clustering TBD)
+      # Remove all SG's but forensic SG, another modify-security-group action
