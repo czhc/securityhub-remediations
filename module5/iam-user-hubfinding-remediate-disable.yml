@@ -1,10 +1,12 @@
 policies:
   - name: iam-user-hubfinding-remediate-disable
+    description: SecurityHub finding filter for calls from malicious IPs with action of removing-keys
     resource: iam-user
     mode:
         type: hub-finding
         role: arn:aws:iam::{account_id}:role/CloudCustodian
         packages: [botocore, boto3, urllib3]
+        memory: 128
     filters:
       - type: event
         key: detail.findings[].Types[0]
