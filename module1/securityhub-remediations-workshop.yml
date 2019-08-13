@@ -182,6 +182,7 @@ Resources:
   Cloud9InstanceProfile:
     Type: "AWS::IAM::InstanceProfile"
     Properties:
+      InstanceProfileName: "Cloud9Instance"
       Path: "/"
       Roles:
         - Ref: "Cloud9Instance"
