@@ -157,7 +157,7 @@ Resources:
               - "logs:CreateLogGroup"
               - "logs:PutLogEvents"
             Resource: 
-              - !Sub 'arn:aws:logs::${AWS::AccountId}:log-group:/aws/lambda/custodian-*'
+              - "*"
   
   Cloud9Instance:            
     Type: AWS::IAM::Role
