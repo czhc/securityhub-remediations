@@ -9,7 +9,7 @@ Resources:
   SecHubWorkshopEnv:
     Type: AWS::Cloud9::EnvironmentEC2
     Properties: 
-      Description: Security Hub Remediations Workshop
+      Description: "Security Hub Remediations Workshop"
       InstanceType: t2.micro
       Name: SecHubWorkshop
   
