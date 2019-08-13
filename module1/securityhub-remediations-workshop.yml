@@ -15,10 +15,11 @@ Resources:
   
   Cloud9InstancePolicy:
     Type: AWS::IAM::Policy
+    DependsOn: Cloud9Instance
     Properties: 
       PolicyName: Cloud9RemediationTesting
       Roles: 
-        - Ref "Cloud9Instance"
+        - Ref: "Cloud9Instance"
       PolicyDocument: 
         Version: "2012-10-17"
         Statement: 
