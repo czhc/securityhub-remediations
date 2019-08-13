@@ -30,8 +30,7 @@ policies:
         # snapshot the disk for forensics
       - type: snapshot
         copy-tags: [Name]
-        # stop the instance
-      # - stop
+
 
 # Test Hint
 # aws ssm send-command --document-name AWS-RunShellScript --parameters commands=["nslookup guarddutyc2activityb.com"] --targets "Key=Tag:Name,Values=RemediationTestTarget" --comment "Force GuardDutyFinding" --cloud-watch-output-config CloudWatchLogGroupName=/aws/ssm/AWS-RunShellScript,CloudWatchOutputEnabled=true

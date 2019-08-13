@@ -50,11 +50,10 @@ or be comfortable setting up a python3 environment with pip3, ssh, and any text 
     10. Within the Cloud9 browser tab, open the file securityhub-remediations/module1/config
     11. Replace "{AWS_ACCOUNT_NUMBER}" with your AWS account number
     12. Click File->Save As
-    13. In Folder, enter "~/.aws".
-    14. In Filename, enter "config"
-    15. Click "Save"
-    16. Test the AWS Credentials by going to the IDE's terminal window then enter "aws s3 ls --profile cc"
-    17. If you get AccessDenied, then review the edits you made to ~/.aws/config and step 5 as you need to have working credentials for CloudCustodian to work.
+    13. In Folder, enter "~/.aws"
+    14. Click "Save"
+    15. Test the AWS Credentials by going to the IDE's terminal window then enter "aws s3 ls --profile cc"
+    16. If you get AccessDenied, then review the edits you made to ~/.aws/config and step 5 as you need to have working credentials for CloudCustodian to work.
 4. Install Cloud Custodian
     1. To install Cloud Custodian, just run the following in the bash terminal window of Cloud9:
 ```
@@ -108,9 +107,8 @@ custodian run -s /tmp --profile cc -c ~/environment/securityhub-remediations/mod
 ```
 2. Review the Logs via https://console.aws.amazon.com/cloudwatch/home?region=us-east-1#logStream:group=/aws/lambda/custodian-ec2-sechub-remediate-severity-with-findings;streamFilter=typeLogStreamPrefix 
 3. Review module4/ec2-public-ingress.yml observing that the lack of a "mode" section means it can be run anytime to find the risky configuration without requiring a vulnerability event.
-4. Now run the following commands to start the instance, and associate the InstanceProfile so the instance is ready for the next module.
+4. Now run the following command to re-associate the InstanceProfile so the instance is ready for the next module.
 ```
-aws ec2 start-instances --instance-ids $(aws ec2 describe-instances --filters "Name=tag:Name,Values=RemediationTestTarget" --query Reservations[*].Instances[*].[InstanceId] --output text)
 aws ec2 associate-iam-instance-profile --iam-instance-profile Name=Cloud9Instance --instance-id $(aws ec2 describe-instances --filters "Name=tag:Name,Values=RemediationTestTarget" --query Reservations[*].Instances[*].[InstanceId] --output text)
 ```
 
