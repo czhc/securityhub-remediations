@@ -157,6 +157,7 @@ Resources:
   Cloud9Instance:            
     Type: AWS::IAM::Role
     Properties:
+      RoleName: Cloud9Instance
       AssumeRolePolicyDocument:
         Version: "2012-10-17"
         Statement:
