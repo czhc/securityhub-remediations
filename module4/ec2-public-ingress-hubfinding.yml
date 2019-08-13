@@ -23,10 +23,15 @@ policies:
         value_type: swap
         op: in
         value: "0.0.0.0/0" # anywhere
-      - type: check-permissions
-        match: allowed
-        actions:
-        - s3:GetObject
+      - or:
+          - type: check-permissions
+            match: allowed
+            actions:
+            - s3:GetObject
+          - type: check-permissions
+            match: allowed
+            actions:
+            - s3:*    
     actions:
       - type: set-instance-profile
         # snapshot the disk for forensics
