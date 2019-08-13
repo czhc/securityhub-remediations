@@ -74,11 +74,7 @@ Resources:
             Effect: "Allow"
             Action:
               - "s3:GetObject"
-            Resource: 
-              - !Sub 'arn:aws:s3:::aws-ssm-${AWS::Region}/*'
-              - !Sub 'arn:aws:s3:::amazon-ssm-${AWS::Region}/*'
-              - !Sub 'arn:aws:s3:::${AWS::Region}-birdwatcher-prod/*'
-              - !Sub 'arn:aws:s3:::patch-baseline-snapshot-${AWS::Region}/*'
+            Resource: "*"
               
   CloudCustodianPolicy:
     Type: AWS::IAM::Policy
