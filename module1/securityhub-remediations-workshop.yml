@@ -15,7 +15,6 @@ Resources:
   
   Cloud9InstancePolicy:
     Type: AWS::IAM::Policy
-    DependsOn: Cloud9Instance
     Properties: 
       PolicyName: Cloud9RemediationTesting
       Roles: 
@@ -24,21 +23,21 @@ Resources:
         Version: "2012-10-17"
         Statement: 
           -
-            Effect: Allow
+            Effect: "Allow"
             Action: 
               - "ec2:StartInstance"
               - "ec2:Describe*"
               - "guardduty:CreateSampleFindings"
             Resource: "*"
           -    
-            Effect: Allow
+            Effect: "Allow"
             Action: 
               - "logs:CreateLogStream"
               - "logs:CreateLogGroup"
               - "logs:PutLogEvents"
             Resource: !Sub 'arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/ssm/AWS-RunShellScript*'
           -
-            Effect: Allow
+            Effect: "Allow"
             Action: 
               - "ssm:SendCommand"
               - "ssm:DescribeAssociation"
@@ -58,7 +57,7 @@ Resources:
               - "ssm:UpdateInstanceInformation"
             Resource: "*"
           -
-            Effect: Allow
+            Effect: "Allow"
             Action:
               - "ssmmessages:CreateControlChannel"
               - "ssmmessages:CreateDataChannel"
@@ -83,7 +82,7 @@ Resources:
         Statement: 
           -
             Sid": "CCWrite"
-            Effect: Allow
+            Effect: "Allow"
             Action: 
               - "ssm:SendCommand"
               - "ssm:CreateOpsItem"
@@ -112,7 +111,7 @@ Resources:
             Resource: "*"
           -
             Sid: "CCDeployLambdas"
-            Effect: Allow
+            Effect: "Allow"
             Action: 
               - "lambda:CreateFunction"
               - "lambda:TagResource"
@@ -130,14 +129,14 @@ Resources:
               - !Sub 'arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:custodian-*'
           -
             Sid: "CCPassRole"
-            Effect: Allow
+            Effect: "Allow"
             Action:
               - "iam:PassRole"
             Resource:
               - !Sub 'arn:aws:iam::${AWS::AccountId}:role/CloudCustodian'
           -
             Sid: "CCSecurityHub"
-            Effect: Allow
+            Effect: "Allow"
             Action:
               - "securityhub:UpdateFindings"
               - "securityhub:BatchImportFindings"
@@ -147,7 +146,7 @@ Resources:
             Resource: "*"
           -
             Sid: "CCLogs"
-            Effect: Allow
+            Effect: "Allow"
             Action: 
               - "logs:CreateLogStream"
               - "logs:CreateLogGroup"
