@@ -207,7 +207,7 @@ Resources:
           Value: "SecurityHubRemediationsTestTarget"
       SecurityGroupIngress:
         - CidrIp: "0.0.0.0/0"
-          Description: "Public ingress to port 443, however the EC2 instance it will be attached to won't have a process listening to that port"
+          Description: "Public ingress to port 443 however the EC2 instance it will be attached to will not have a process listening to that port"
           FromPort: 443
           ToPort: 443
           IpProtocol: tcp
