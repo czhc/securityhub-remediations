@@ -38,4 +38,4 @@ policies:
       - type: snapshot
         copy-tags: [Name]
         # stop the instance
-      - stop
+      #- stop
