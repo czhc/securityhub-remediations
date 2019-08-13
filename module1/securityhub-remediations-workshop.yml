@@ -177,7 +177,7 @@ Resources:
       Roles:
         - Ref: "Cloud9Instance"
 
-  CloudCustodian:            
+  CloudCustodian: 
     Type: AWS::IAM::Role
     Properties:
       AssumeRolePolicyDocument:
@@ -189,7 +189,7 @@ Resources:
               #Service:
               #  - lambda.amazonaws.com
               AWS: 
-                - "arn:aws:iam::${AWS::AccountId}:role/Cloud9Instance"
+                - !GetAtt: Cloud9Instance.Arn
             Action: 
               - "sts:AssumeRole"
       ManagedPolicyArns: 
