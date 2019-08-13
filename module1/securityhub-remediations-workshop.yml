@@ -217,7 +217,8 @@ Resources:
       ImageId: !Ref "LatestAmiId" 
       InstanceType: "t2.micro"
       Tags:
-        - Name: "RemediationTestTarget"
+        - Key: "Name"
+          Value: "RemediationTestTarget"
       SecurityGroupIds:
         - Ref: "RemediationTargetSG"
       IamInstanceProfile: !Ref "Cloud9InstanceProfile"
