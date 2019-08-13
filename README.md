@@ -26,7 +26,10 @@ or be comfortable setting up a python3 environment with pip3, ssh, and any text 
 
 # Modules
 
-1. {TODO: replace with final model names}
+1. Module 1 - Environment Build and Configuration
+2. Module 2 - Security Hub Custom Actions - Human initiated automation
+3. Module 3 - Automated Remediations - GuardDuty DNS Event on EC2 Instance
+4. Module 4 - Automated Remediations - Vulnerability Event on EC2 Instance with Very Risky Configuration
 
 
 ## Module 1 - Environment Build and Configuration
@@ -95,7 +98,7 @@ aws ec2 associate-iam-instance-profile --iam-instance-profile Name=Cloud9Instanc
 custodian run -s /tmp --profile cc -c ~/environment/securityhub-remediations/module3/ec2-sechub-remediate-severity-with-findings.yml
 aws ssm send-command --document-name AWS-RunShellScript --parameters commands=["nslookup guarddutyc2activityb.com"] --targets "Key=tag:Name,Values=RemediationTestTarget" --comment "Force GuardDutyFinding" --cloud-watch-output-config CloudWatchLogGroupName=/aws/ssm/AWS-RunShellScript,CloudWatchOutputEnabled=true
 ```
-2.  https://console.aws.amazon.com/cloudwatch/home?region=us-east-1#logStream:group=/aws/lambda/custodian-ec2-sechub-remediate-severity-with-findings;streamFilter=typeLogStreamPrefix 
+2.  Review the Logs via https://console.aws.amazon.com/cloudwatch/home?region=us-east-1#logStream:group=/aws/lambda/custodian-ec2-sechub-remediate-severity-with-findings;streamFilter=typeLogStreamPrefix 
 
 ## Module 4 - Automated Remediations - Vulnerability Event on EC2 Instance with Very Risky Configuration
 1. Run the following commands:
@@ -103,7 +106,13 @@ aws ssm send-command --document-name AWS-RunShellScript --parameters commands=["
 custodian run -s /tmp --profile cc -c ~/environment/securityhub-remediations/module4/ec2-public-ingress-hubfinding.yml
 custodian run -s /tmp --profile cc -c ~/environment/securityhub-remediations/module1/force-vulnerability-finding.yml
 ```
-2. 
+2. Review the Logs via https://console.aws.amazon.com/cloudwatch/home?region=us-east-1#logStream:group=/aws/lambda/custodian-ec2-sechub-remediate-severity-with-findings;streamFilter=typeLogStreamPrefix 
+3. Review module4/ec2-public-ingress.yml observing that the lack of a "mode" section means it can be run anytime to find the risky configuration without requiring a vulnerability event.
+4. Now run the following commands to start the instance, and associate the InstanceProfile so the instance is ready for the next module.
+```
+aws ec2 start-instances --instance-ids $(aws ec2 describe-instances --filters "Name=tag:Name,Values=RemediationTestTarget" --query Reservations[*].Instances[*].[InstanceId] --output text)
+aws ec2 associate-iam-instance-profile --iam-instance-profile Name=Cloud9Instance --instance-id $(aws ec2 describe-instances --filters "Name=tag:Name,Values=RemediationTestTarget" --query Reservations[*].Instances[*].[InstanceId] --output text)
+```
 
 ## Module 5 - Automated Remediations - GuardDuty Event on IAMUser
 Work In Progress
