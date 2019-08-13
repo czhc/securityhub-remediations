@@ -1,0 +1,14 @@
+policies:
+  - name: iam-user-hubfinding-remediate-disable
+    resource: iam-user
+    mode:
+        type: hub-finding
+        role: arn:aws:iam::{account_id}:role/CloudCustodian
+        packages: [botocore, boto3, urllib3]
+    filters:
+      - type: event
+        key: detail.findings[].Types[0]
+        value: "TTPs/UnauthorizedAccess:IAMUser-MaliciousIPCaller"
+    actions: 
+      - type: remove-keys
+        disable: true
