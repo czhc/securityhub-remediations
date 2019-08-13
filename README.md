@@ -30,6 +30,7 @@ or be comfortable setting up a python3 environment with pip3, ssh, and any text 
 2. Module 2 - Security Hub Custom Actions - Human initiated automation
 3. Module 3 - Automated Remediations - GuardDuty DNS Event on EC2 Instance
 4. Module 4 - Automated Remediations - Vulnerability Event on EC2 Instance with Very Risky Configuration
+5. Module 5 - Automated Remediations - GuardDuty Event on IAMUser
 
 
 ## Module 1 - Environment Build and Configuration
@@ -105,7 +106,7 @@ aws ssm send-command --document-name AWS-RunShellScript --parameters commands=["
 custodian run -s /tmp --profile cc -c ~/environment/securityhub-remediations/module4/ec2-public-ingress-hubfinding.yml
 custodian run -s /tmp --profile cc -c ~/environment/securityhub-remediations/module1/force-vulnerability-finding.yml
 ```
-2. Review the Logs via https://console.aws.amazon.com/cloudwatch/home?region=us-east-1#logStream:group=/aws/lambda/custodian-ec2-sechub-remediate-severity-with-findings;streamFilter=typeLogStreamPrefix 
+2. Review the Logs via https://console.aws.amazon.com/cloudwatch/home?region=us-east-1#logStream:group=/aws/lambda/custodian-ec2-public-ingress-hubfinding;streamFilter=typeLogStreamPrefix 
 3. Review module4/ec2-public-ingress.yml observing that the lack of a "mode" section means it can be run anytime to find the risky configuration without requiring a vulnerability event.
 4. Now run the following command to re-associate the InstanceProfile so the instance is ready for the next module.
 ```
@@ -113,10 +114,12 @@ aws ec2 associate-iam-instance-profile --iam-instance-profile Name=Cloud9Instanc
 ```
 
 ## Module 5 - Automated Remediations - GuardDuty Event on IAMUser
-Work In Progress
+1. Run the following commands:
+```
+custodian run -s /tmp --profile cc -c ~/environment/securityhub-remediations/module5/iiam-user-hubfinding-remediate-disable.yml
+aws guardduty create-sample-findings --detector-id `aws guardduty list-detectors --profile cc --query DetectorIds --output text` --finding-types 'UnauthorizedAccess:IAMUser/MaliciousIPCaller'
+```
 
-
-## Module 6 - Automated Remediations - GuardDuty Event on EC2 Instance - Isolate rather than Stop
-Work In Progress
+TODO: update to create iam-user named "GeneratedFindingUserName" with accesskeys 
 
 
