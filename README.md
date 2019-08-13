@@ -22,6 +22,7 @@ or be comfortable setting up a python3 environment with pip3, ssh, and any text 
 7. If any of your existing ec2 instances have their tag:Name=RemediationTestTarget then please rename them as instances with this value will be the target for actions during this workshop
 8. Resources will be created in the default vpc.  If you don't have a default vpc, you will need to modify the commands to specify the vpc you want to use.
 9. A git client to download the workshop files
+10. If your account already has automated remediations which respond to security groups with public ingress, ec2 instances with public ips, please use an account which doesn't have those remediations, or temporary turn them off, otherwise race conditions will lead to results which don't match what this workshop describes.
 
 # Modules
 

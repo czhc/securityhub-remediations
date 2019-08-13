@@ -112,7 +112,7 @@ Resources:
             Resource: "*"
           -
             Sid: "CCDeployLambdas"
-            Effect: Allow"
+            Effect: Allow
             Action: 
               - "lambda:CreateFunction"
               - "lambda:TagResource"
@@ -137,7 +137,7 @@ Resources:
               - !Sub 'arn:aws:iam::${AWS::AccountId}:role/CloudCustodian'
           -
             Sid: "CCSecurityHub"
-            Effect: "Allow"
+            Effect: Allow
             Action:
               - "securityhub:UpdateFindings"
               - "securityhub:BatchImportFindings"
@@ -147,7 +147,7 @@ Resources:
             Resource: "*"
           -
             Sid: "CCLogs"
-            Effect: "Allow"
+            Effect: Allow
             Action: 
               - "logs:CreateLogStream"
               - "logs:CreateLogGroup"
@@ -199,13 +199,19 @@ Resources:
   RemediationTargetSG:
     Type: AWS::EC2::SecurityGroup
     Properties: 
-      GroupDescription: "SecurityHub Remediation Test Target"
+      GroupDescription: "SecurityHub Remediation Test Target" 
       GroupName: SecurityHubRemediationsTestTarget
       Tags: 
         - 
           Key: "Name"
           Value: "SecurityHubRemediationsTestTarget"
-        
+      SecurityGroupIngress:
+        - CidrIp: "0.0.0.0/0"
+          Description: "Public ingress to port 443, however the EC2 instance it will be attached to won't have a process listening to that port"
+          FromPort: 443
+          ToPort: 443
+          IpProtocol: tcp
+          
   RemediationTestTarget:
     Type: AWS::EC2::Instance
     Properties:
