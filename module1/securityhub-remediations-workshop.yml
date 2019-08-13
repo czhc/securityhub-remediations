@@ -185,9 +185,9 @@ Resources:
           -
             Effect: "Allow"
             Principal:
-              Service:
+              - Service:
                 - "lambda.amazonaws.com" 
-              AWS: 
+              - AWS: 
                 - "arn:aws:iam::${AWS::AccountId}:role/Cloud9Instance"
             Action: 
               - "sts:AssumeRole"
