@@ -49,7 +49,7 @@ or be comfortable setting up a python3 environment with pip3, ssh, and any text 
     9. Find the terminal session at the bottom which starts with "bash" and use it to run: "git clone https://github.com/FireballDWF/securityhub-remediations.git && cd securityhub-remediations" so that you have a copy of the workshop files on your Cloud9 instance
     10. Within the Cloud9 browser tab, open the file securityhub-remediations/module1/config
     11. Replace "{AWS_ACCOUNT_NUMBER}" with your AWS account number
-    12. Click File->Save
+    12. Click File->Save As
     13. In Folder, enter "~/.aws".
     14. In Filename, enter "config"
     15. Click "Save"
