@@ -189,7 +189,7 @@ Resources:
               #Service:
               #  - lambda.amazonaws.com
               AWS: 
-                - !GetAtt: Cloud9Instance.Arn
+                - Fn::GetAtt: []Cloud9Instance, Arn]
             Action: 
               - "sts:AssumeRole"
       ManagedPolicyArns: 
