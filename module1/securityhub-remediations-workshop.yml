@@ -229,3 +229,14 @@ Resources:
       SecurityGroupIds:
         - Ref: "RemediationTargetSG"
       IamInstanceProfile: !Ref "Cloud9InstanceProfile"
+  
+  GeneratedFindingUser:    
+    Type: AWS::IAM::User
+    Properties: 
+      UserName: GeneratedFindingUserName
+      
+  GeneratedFindingUserAccessKey: 
+    DependsOn: GeneratedFindingUser
+    Type: AWS::IAM::AccessKey
+    Properties: 
+      UserName: GeneratedFindingUserName

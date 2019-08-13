@@ -120,6 +120,5 @@ custodian run -s /tmp --profile cc -c ~/environment/securityhub-remediations/mod
 aws guardduty create-sample-findings --detector-id `aws guardduty list-detectors --profile cc --query DetectorIds --output text` --finding-types 'UnauthorizedAccess:IAMUser/MaliciousIPCaller'
 ```
 
-TODO: update to create iam-user named "GeneratedFindingUserName" with accesskeys 
 
 
