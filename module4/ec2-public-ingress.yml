@@ -1,0 +1,40 @@
+policies:
+  - name: ec2-public-ingress-s3-readable
+    description: filters for ec2 instances with security-groups with ingress rule allowing public access
+    resource: ec2
+    filters:
+      - type: value
+        key: PublicIpAddress
+        value: not-null
+      - type: value
+        key: IamInstanceProfile
+        value: not-null
+      - type: security-group
+        key: IpPermissions[].IpRanges[].CidrIp
+        value_type: swap
+        op: in
+        value: "0.0.0.0/0" # anywhere
+      - or:
+          - type: check-permissions
+            match: allowed
+            actions:
+            - s3:GetObject
+          - type: check-permissions
+            match: allowed
+            actions:
+            - s3:* 
+    actions:
+      - type: post-finding
+        severity_normalized: 70
+        types:
+        - "Software and Configuration Checks/AWS Security Best Practices"
+        recommendation: "Be Afraid, Be Very Afraid"
+        recommendation_url: "https://www.youtube.com/watch?v=--hMJPUBwMc"
+        criticality: 100
+        confidence: 99
+        compliance_status: FAILED
+      # Uncomment the following line to auto-remediate, but application breakage will occur if there are application dependencies on the instance profile granted privileges     
+      #- type: set-instance-profile
+        # By not specifying a name, will effectively disassociate-iam-instance-profile from matching ec2 instances
+      #- type: post-item
+      #  priority: 3
