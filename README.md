@@ -116,7 +116,7 @@ aws ec2 associate-iam-instance-profile --iam-instance-profile Name=Cloud9Instanc
 ## Module 5 - Automated Remediations - GuardDuty Event on IAMUser
 1. Run the following commands:
 ```
-custodian run -s /tmp --profile cc -c ~/environment/securityhub-remediations/module5/iiam-user-hubfinding-remediate-disable.yml
+custodian run -s /tmp --profile cc -c ~/environment/securityhub-remediations/module5/iam-user-hubfinding-remediate-disable.yml
 aws guardduty create-sample-findings --detector-id `aws guardduty list-detectors --profile cc --query DetectorIds --output text` --finding-types 'UnauthorizedAccess:IAMUser/MaliciousIPCaller'
 ```
 
