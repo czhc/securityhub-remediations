@@ -34,8 +34,8 @@ or be comfortable setting up a python3 environment with pip3, ssh, and any text 
 
 
 ## Module 1 - Environment Build and Configuration
-0. Run "git clone https://github.com/FireballDWF/securityhub-remediations.git && cd securityhub-remediations"
-1. Enable Security Hub (if not already enabled - https://docs.aws.amazon.com/securityhub/latest/userguide/securityhub-settingup.html#securityhub-enable
+0. Run "aws securityhub enable-security-hub" if you don't already have it enabled.
+1. Run "git clone https://github.com/FireballDWF/securityhub-remediations.git && cd securityhub-remediations"
 2. Launch cloudformation to setup the environment
     1. Use the console to launch a cloudformation stack using the template module1/securityhub-remediations-workshop.yml as if you launch from the cli, the role must match your console role otherwise you won't be able to see the Cloud9 Environment IDE.
 3. Setup AWS credentials for the Cloud9 environment
