@@ -65,7 +65,7 @@ docker pull cloudcustodian/c7n
 ```
 docker run -it -v $(pwd)/output:/home/custodian/output -v $(pwd)/module1/force-vulnerability-finding.yml:/home/custodian/policy.yml -v /home/ec2-user/.aws/config:/home/custodian/.aws/config cloudcustodian/c7n run -c policy.yml -s /tmp --profile cc 
 ```
-    2. You should expect to see 2 output lines, one containing "count:1" and another containing "resources:1", similar to the following, and if you get anything else, please troubleshoot and if can't figure out the problem, please ask for help before proceeding to next module.
+    2. You should expect to see 2 output lines, one containing "count:1" and another containing "resources:1", similar to the following output.  If you get an error on "batch-import-findings" then it means you have not enabled SecurityHub in the account and region.
 ```
 2019-08-11 16:33:57,326: custodian.policy:INFO policy:ec2-force-vulnerabilities resource:ec2 region:us-east-1 count:1 time:0.00
 2019-08-11 16:33:57,787: custodian.policy:INFO policy:ec2-force-vulnerabilities action:instancefinding resources:1 execution_time:0.46
