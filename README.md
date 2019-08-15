@@ -112,16 +112,16 @@ aws ec2 start-instances --instance-ids $(aws ec2 describe-instances --filters "N
 ```
 
 ## Module 3 - Automated Remediations - GuardDuty DNS Event on EC2 Instance
-1. Run the following command which deploys a Cloud Custodian policy which will be triggered when there are GuardDuty findings there are equal to or greater than medium and the EC2 instance has any vulnerability reported to SecurityHub
+1. Run the following command which runs a Cloud Custodian policy named [ec2-sechub-remediate-severity-with-findings] (https://github.com/FireballDWF/securityhub-remediations/blob/master/module3/ec2-sechub-remediate-severity-with-findings.yml)  which generates a lambda which will be invoked when [SecurityHub generates a Cloudwatch Event](https://docs.aws.amazon.com/securityhub/latest/userguide/securityhub-cloudwatch-events.html) based in it being sent a finding, in this example the finding will be triggered when there is GuardDuty generates a finding, and the severity of the is greater than or equal to 31, and the EC2 instance has any vulnerability previously reported to SecurityHub
 ```
 docker run -it -v /home/ec2-user/environment/securityhub-remediations/output:/home/custodian/output:rw -v /home/ec2-user/environment/securityhub-remediations:/home/custodian/securityhub-remediations:ro -v /home/ec2-user/.aws:/home/custodian/.aws:ro cloudcustodian/c7n run --cache-period 0 -s /home/custodian/output --profile cc -c /home/custodian/securityhub-remediations/module3/ec2-sechub-remediate-severity-with-findings.yml
 ```
-2. Next run the following command which leverages [Systems Manager's Run Command](https://docs.aws.amazon.com/systems-manager/latest/userguide/execute-remote-commands.html) to run a the "nslookup" command on the ec2 instance tag:Name RemediationTestTarget where it's looking up a dns name which [GuardDuty will detect as Command and Control activity](https://docs.aws.amazon.com/guardduty/latest/ug/guardduty_backdoor.html#backdoor7)
+2. Next run the following command which leverages [Systems Manager's Run Command](https://docs.aws.amazon.com/systems-manager/latest/userguide/execute-remote-commands.html) to run an "nslookup" command on the ec2 instance tag:Name RemediationTestTarget where it's looking up a dns name which [GuardDuty will detect as Command and Control activity](https://docs.aws.amazon.com/guardduty/latest/ug/guardduty_backdoor.html#backdoor7)
 ```
 aws ssm send-command --document-name AWS-RunShellScript --parameters commands=["nslookup guarddutyc2activityb.com"] --targets "Key=tag:Name,Values=RemediationTestTarget" --comment "Force GuardDutyFinding" --cloud-watch-output-config:ro cloudWatchLogGroupName=/aws/ssm/AWS-RunShellScript,CloudWatchOutputEnabled=true
 ```
-2.  As it can take a long time (more than 15minutes) for GuardDuty to generate a DNS based finding, please proceed to the next module, then come back to the next review step later.
-3.  Review the Logs via https://console.aws.amazon.com/cloudwatch/home?region=us-east-1#logStream:group=/aws/lambda/custodian-ec2-sechub-remediate-severity-with-findings;streamFilter=typeLogStreamPrefix 
+3.  As it can take a long time (more than 15 minutes and could be a few hours) for GuardDuty to generate a DNS based finding, please proceed to the next module, then come back to the next review step later.
+4.  Review the Logs via https://console.aws.amazon.com/cloudwatch/home?region=us-east-1#logStream:group=/aws/lambda/custodian-ec2-sechub-remediate-severity-with-findings;streamFilter=typeLogStreamPrefix 
 
 ## Module 4 - Automated Remediations - Vulnerability Event on EC2 Instance with Very Risky Configuration
 1. Run the following commands:
