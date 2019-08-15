@@ -63,7 +63,7 @@ docker pull cloudcustodian/c7n
 5. Test first Cloud Custodian Policy, which reports that the instance created in the previous step has a vulnerability
     1. Run the following:
 ```
-docker run -it -v /home/ec2-user/output:/home/custodian/output -v /home/ec2-user/environment/securityhub-remediations:/home/custodian/securityhub-remediations -v /home/ec2-user/.aws/config:/home/custodian/.aws/config cloudcustodian/c7n run --cache-period 0 -s /tmp --profile cc -c /home/custodian/securityhub-remediations/module1/force-vulnerability-finding.yml  
+docker run -it -v /home/ec2-user/output:/home/custodian/output -v /home/ec2-user/environment/securityhub-remediations:/home/custodian/securityhub-remediations:ro -v /home/ec2-user/.aws/config:/home/custodian/.aws/config:ro cloudcustodian/c7n run --cache-period 0 -s /tmp --profile cc -c /home/custodian/securityhub-remediations/module1/force-vulnerability-finding.yml  
 ```
     2. You should expect to see 2 output lines, one containing "count:1" and another containing "resources:1", similar to the following output.  If you get an error on "batch-import-findings" then it means you have not enabled SecurityHub in the account and region.
 ```
@@ -74,7 +74,7 @@ docker run -it -v /home/ec2-user/output:/home/custodian/output -v /home/ec2-user
 ## Module 2 - Security Hub Custom Actions - Human initiated automation
 1. Run the following:
 ```
-docker run -it -v /home/ec2-user/output:/home/custodian/output -v /home/ec2-user/environment/securityhub-remediations:/home/custodian/securityhub-remediations -v /home/ec2-user/.aws/config:/home/custodian/.aws/config cloudcustodian/c7n run --cache-period 0 -s /tmp --profile cc -c /home/custodian/securityhub-remediations/module2/ec2-sechub-custom-action.yml
+docker run -it -v /home/ec2-user/output:/home/custodian/output -v /home/ec2-user/environment/securityhub-remediations:/home/custodian/securityhub-remediations:ro -v /home/ec2-user/.aws/config:/home/custodian/.aws/config:ro cloudcustodian/c7n run --cache-period 0 -s /tmp --profile cc -c /home/custodian/securityhub-remediations/module2/ec2-sechub-custom-action.yml
 ```
 2. You should see a single output line containing "custodian.policy:INFO Provisioning policy lambda DenySnapStop". Note that the string after 'Provisioning policy lambda" matches the poicy name contained within the file which was the last parameter of the previous step.  The name of the generated lambda will be composed of that policy name prefixed with "custodian-"
 3. Open the Security Hub Console and click on Findings, or click https://console.aws.amazon.com/securityhub/home?region=us-east-1#/findings?search=RecordState%3D%255Coperator%255C%253AEQUALS%255C%253AACTIVE 
@@ -93,16 +93,16 @@ aws ec2 associate-iam-instance-profile --iam-instance-profile Name=Cloud9Instanc
 ## Module 3 - Automated Remediations - GuardDuty DNS Event on EC2 Instance
 1. Run the following commands, the first deploys a Cloud Custodian policy which will be triggered when there are GuardDuty findings there are equal to or greater than medium and the EC2 instance has any vulnerability reported to SecurityHub, and the 2nd command simulates an GuardDuty finding.
 ```
-docker run -it -v /home/ec2-user/output:/home/custodian/output -v /home/ec2-user/environment/securityhub-remediations:/home/custodian/securityhub-remediations -v /home/ec2-user/.aws/config:/home/custodian/.aws/config cloudcustodian/c7n run --cache-period 0 -s /tmp --profile cc -c /home/custodian/securityhub-remediations/module3/ec2-sechub-remediate-severity-with-findings.yml
-aws ssm send-command --document-name AWS-RunShellScript --parameters commands=["nslookup guarddutyc2activityb.com"] --targets "Key=tag:Name,Values=RemediationTestTarget" --comment "Force GuardDutyFinding" --cloud-watch-output-config CloudWatchLogGroupName=/aws/ssm/AWS-RunShellScript,CloudWatchOutputEnabled=true
+docker run -it -v /home/ec2-user/output:/home/custodian/output -v /home/ec2-user/environment/securityhub-remediations:/home/custodian/securityhub-remediations:ro -v /home/ec2-user/.aws/config:/home/custodian/.aws/config:ro cloudcustodian/c7n run --cache-period 0 -s /tmp --profile cc -c /home/custodian/securityhub-remediations/module3/ec2-sechub-remediate-severity-with-findings.yml
+aws ssm send-command --document-name AWS-RunShellScript --parameters commands=["nslookup guarddutyc2activityb.com"] --targets "Key=tag:Name,Values=RemediationTestTarget" --comment "Force GuardDutyFinding" --cloud-watch-output-config:ro cloudWatchLogGroupName=/aws/ssm/AWS-RunShellScript,CloudWatchOutputEnabled=true
 ```
 2.  Review the Logs via https://console.aws.amazon.com/cloudwatch/home?region=us-east-1#logStream:group=/aws/lambda/custodian-ec2-sechub-remediate-severity-with-findings;streamFilter=typeLogStreamPrefix 
 
 ## Module 4 - Automated Remediations - Vulnerability Event on EC2 Instance with Very Risky Configuration
 1. Run the following commands:
 ```
-docker run -it -v /home/ec2-user/output:/home/custodian/output -v /home/ec2-user/environment/securityhub-remediations:/home/custodian/securityhub-remediations -v /home/ec2-user/.aws/config:/home/custodian/.aws/config cloudcustodian/c7n run --cache-period 0 -s /tmp --profile cc -c /home/custodian/securityhub-remediations/module4/ec2-public-ingress-hubfinding.yml
-docker run -it -v /home/ec2-user/output:/home/custodian/output -v /home/ec2-user/environment/securityhub-remediations:/home/custodian/securityhub-remediations -v /home/ec2-user/.aws/config:/home/custodian/.aws/config cloudcustodian/c7n run --cache-period 0 -s /tmp --profile cc -c /home/custodian/securityhub-remediations/module1/force-vulnerability-finding.yml  
+docker run -it -v /home/ec2-user/output:/home/custodian/output -v /home/ec2-user/environment/securityhub-remediations:/home/custodian/securityhub-remediations:ro -v /home/ec2-user/.aws/config:/home/custodian/.aws/config:ro cloudcustodian/c7n run --cache-period 0 -s /tmp --profile cc -c /home/custodian/securityhub-remediations/module4/ec2-public-ingress-hubfinding.yml
+docker run -it -v /home/ec2-user/output:/home/custodian/output -v /home/ec2-user/environment/securityhub-remediations:/home/custodian/securityhub-remediations:ro -v /home/ec2-user/.aws/config:/home/custodian/.aws/config:ro cloudcustodian/c7n run --cache-period 0 -s /tmp --profile cc -c /home/custodian/securityhub-remediations/module1/force-vulnerability-finding.yml  
 ```
 2. Review the Logs via https://console.aws.amazon.com/cloudwatch/home?region=us-east-1#logStream:group=/aws/lambda/custodian-ec2-public-ingress-hubfinding;streamFilter=typeLogStreamPrefix 
 3. Review module4/ec2-public-ingress.yml observing that the lack of a "mode" section means it can be run anytime to find the risky configuration without requiring a vulnerability event.
@@ -114,7 +114,7 @@ aws ec2 associate-iam-instance-profile --iam-instance-profile Name=Cloud9Instanc
 ## Module 5 - Automated Remediations - GuardDuty Event on IAMUser
 1. Run the following commands:
 ```
-docker run -it -v /home/ec2-user/output:/home/custodian/output -v /home/ec2-user/environment/securityhub-remediations:/home/custodian/securityhub-remediations -v /home/ec2-user/.aws/config:/home/custodian/.aws/config cloudcustodian/c7n run --cache-period 0 -s /tmp --profile cc -c /home/custodian/securityhub-remediations/module5/iam-user-hubfinding-remediate-disable.yml
+docker run -it -v /home/ec2-user/output:/home/custodian/output -v /home/ec2-user/environment/securityhub-remediations:/home/custodian/securityhub-remediations:ro -v /home/ec2-user/.aws/config:/home/custodian/.aws/config:ro cloudcustodian/c7n run --cache-period 0 -s /tmp --profile cc -c /home/custodian/securityhub-remediations/module5/iam-user-hubfinding-remediate-disable.yml
 aws guardduty create-sample-findings --detector-id `aws guardduty list-detectors --profile cc --query DetectorIds --output text` --finding-types 'UnauthorizedAccess:IAMUser/MaliciousIPCaller'
 ```
 2. Validation steps TODO
