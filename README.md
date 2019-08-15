@@ -65,26 +65,25 @@ docker pull cloudcustodian/c7n
 ```
 docker run -it -v /home/ec2-user/environment/securityhub-remediations/output:/home/custodian/output:rw -v /home/ec2-user/environment/securityhub-remediations:/home/custodian/securityhub-remediations:ro -v /home/ec2-user/.aws:/home/custodian/.aws:ro cloudcustodian/c7n run --cache-period 0 -s /home/custodian/output --profile cc -c /home/custodian/securityhub-remediations/module1/force-vulnerability-finding.yml  
 ```
-    2. You should expect to see 2 output lines, one containing "count:1" and another containing "resources:1", similar to the following output.  If you get an error on "batch-import-findings" then it means you have not enabled SecurityHub in the account and region.
+    You should expect to see 2 output lines, one containing "count:1" and another containing "resources:1", similar to the following output.  If you get an error on "batch-import-findings" then it means you have not enabled SecurityHub in the account and region.
 ```
 2019-08-11 16:33:57,326: custodian.policy:INFO policy:ec2-force-vulnerabilities resource:ec2 region:us-east-1 count:1 time:0.00
 2019-08-11 16:33:57,787: custodian.policy:INFO policy:ec2-force-vulnerabilities action:instancefinding resources:1 execution_time:0.46
 ```
-
 Here is a breakdown of the command you just ran:
-|component|Explaination|
-|---------|------------|
-|docker run| [Run](https://docs.docker.com/engine/reference/run/) a [docker](https://docs.docker.com/engine/reference/commandline/cli/) container|
-|-it| [interactive/foreground mode](https://docs.docker.com/engine/reference/run/#foreground)|
-|/home/ec2-user/environment/securityhub-remediations/output:/home/custodian/output:rw|maps a directory for the output of Cloud Custodian custodian between the container host and the container instance and is read/write enabled|
-|v /home/ec2-user/environment/securityhub-remediations:/home/custodian/securityhub-remediations:ro|map the files for the workshop into the container so the cloud custodian policies are available insider the container. volume is mapped in ReadOnly mode|
-|-v /home/ec2-user/.aws:/home/custodian/.aws:ro|maps the [aws cli configuration files](https://docs.aws.amazon.com/cli/latest/userguide/cli-configure-files.html) into the container in read-only mode.  Cloud Custodian uses the same configuration files, as both use the [boto3 Python SDK](https://boto3.amazonaws.com/v1/documentation/api/latest/index.html)|
-|cloudcustodian/c7n|Container image which is downloaded from https://hub.docker.com/r/cloudcustodian/c7n|
-|run|instructs Cloud Custodian to run a policy. This is the first part of the command line which is passed to CloudCustodian|
-|--cache-period 0|disables cloud custodian's caching of api call results|
-|-s /home/custodian/output|configures where log and resource data is placed| 
-|--profile cc|configs which AWS credentials profile to use| 
-|-c /home/custodian/securityhub-remediations/module1/force-vulnerability-finding.yml|specifies the actual policy to run| 
+| Command line Component | Explaination |
+| --------- | ------------ |
+| docker run | [Run](https://docs.docker.com/engine/reference/run/) a [docker](https://docs.docker.com/engine/reference/commandline/cli/) container |
+| -it | [interactive/foreground mode](https://docs.docker.com/engine/reference/run/#foreground) |
+| -v /home/ec2-user/environment/securityhub-remediations/output:/home/custodian/output:rw | maps a directory for the output of Cloud Custodian custodian between the container host and the container instance and is read/write enabled |
+| -v /home/ec2-user/environment/securityhub-remediations:/home/custodian/securityhub-remediations:ro|map the files for the workshop into the container so the cloud custodian policies are available insider the container. volume is mapped in ReadOnly mode |
+| -v /home/ec2-user/.aws:/home/custodian/.aws:ro | maps the [aws cli configuration files](https://docs.aws.amazon.com/cli/latest/userguide/cli-configure-files.html) into the container in read-only mode.  Cloud Custodian uses the same configuration files, as both use the [boto3 Python SDK](https://boto3.amazonaws.com/v1/documentation/api/latest/index.html) |
+| cloudcustodian/c7n | Container image which is downloaded from https://hub.docker.com/r/cloudcustodian/c7n |
+| run | instructs Cloud Custodian to run a policy. This is the first part of the command line which is passed to CloudCustodian |
+| --cache-period 0 | disables cloud custodian's caching of api call results |
+| -s /home/custodian/output | configures where log and resource data is placed | 
+| --profile cc | configs which AWS credentials profile to use | 
+| -c /home/custodian/securityhub-remediations/module1/force-vulnerability-finding.yml | specifies the actual policy to run | 
 
 ## Module 2 - Security Hub Custom Actions - Human initiated automation
 1. Run the following:
