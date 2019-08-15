@@ -31,9 +31,11 @@ policies:
           - type: check-permissions
             match: allowed
             actions:
-            - s3:*    
+            - s3:*
+      # is member of ASG due to the asg action, should have a non-asg version of the policy as well
+      - "tag:aws:autoscaling:groupName": not-null
     actions:
-      # Enable termination protection - Enhancement request
+      # Enable termination protection - https://github.com/cloud-custodian/cloud-custodian/issues/2545
       # snapshot the disk for forensics
       - type: snapshot
         copy-tags: [Name]
@@ -44,4 +46,7 @@ policies:
       # Remove priviledges from the instance
       - type: set-instance-profile
       # remove from any ASG or clustering - Enhancement request (at least for ASG.  Clustering TBD)
+      - type: send-command
+        command:
+          DocumentName: AWS-ASGEnterStandby # Looking for an SSM doc which does Detach from ASG instead, or implementation of https://github.com/cloud-custodian/cloud-custodian/issues/4603
       # Remove all SG's but forensic SG, another modify-security-group action
