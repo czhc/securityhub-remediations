@@ -17,8 +17,8 @@ In this workshop you will learn how to implement automated remediations of findi
 3. You will incur charges for the AWS resources used in this workshop. The charges for some of the resources may be covered through the AWS Free Tier. The demo uses free tier choices wherever possible.
 4. You must run this workshop in a region supported by AWS Security Hub (https://docs.aws.amazon.com/general/latest/gr/rande.html#sechub_region).  We recommended using the us-east-1 region.
 5. You must run this workshop in a region support by AWS Cloud9 (https://docs.aws.amazon.com/general/latest/gr/rande.html#cloud9_region), 
-or be comfortable setting up a python3 environment with pip3, ssh, and any text editor.
-6. You should already have GuardDuty enabled on the account, if not follow https://docs.aws.amazon.com/guardduty/latest/ug/guardduty_settingup.html#guardduty_enable-gd 
+or be comfortable setting up a docker environment with aws credentials in the host env.
+6. You need to have GuardDuty enabled on the account for module 2 and 5 to work, if not follow https://docs.aws.amazon.com/guardduty/latest/ug/guardduty_settingup.html#guardduty_enable-gd 
 7. If any of your existing ec2 instances have their tag:Name=RemediationTestTarget then please rename them as instances with this value will be the target for actions during this workshop
 8. Resources will be created in the default vpc.  If you don't have a default vpc, you will need to modify the commands to specify the vpc you want to use.
 9. A git client to download the workshop files
@@ -60,7 +60,7 @@ or be comfortable setting up a python3 environment with pip3, ssh, and any text 
 ```
 docker pull cloudcustodian/c7n 
 ```
-5. Test first Cloud Custodian Policy, which reports that the instance created in the previous step has a vulnerability
+5. Test first Cloud Custodian Policy, which reports that the ec2 instance created in the cloudformation has a vulnerability
     1. Run the following:
 ```
 docker run -it -v /home/ec2-user/environment/securityhub-remediations/output:/home/custodian/output:rw -v /home/ec2-user/environment/securityhub-remediations:/home/custodian/securityhub-remediations:ro -v /home/ec2-user/.aws/config:/home/custodian/.aws/config:ro cloudcustodian/c7n run --cache-period 0 -s /home/custodian/output --profile cc -c /home/custodian/securityhub-remediations/module1/force-vulnerability-finding.yml  
