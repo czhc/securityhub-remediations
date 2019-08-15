@@ -109,7 +109,6 @@ aws ec2 associate-iam-instance-profile --iam-instance-profile Name=Cloud9Instanc
 11. Now run the following command to start the instance so the instance is ready for the next module.
 ```
 aws ec2 start-instances --instance-ids $(aws ec2 describe-instances --filters "Name=tag:Name,Values=RemediationTestTarget" --query Reservations[*].Instances[*].[InstanceId] --output text)
-aws ec2 associate-iam-instance-profile --iam-instance-profile Name=Cloud9Instance --instance-id $(aws ec2 describe-instances --filters "Name=tag:Name,Values=RemediationTestTarget" --query Reservations[*].Instances[*].[InstanceId] --output text)
 ```
 
 ## Module 3 - Automated Remediations - GuardDuty DNS Event on EC2 Instance
