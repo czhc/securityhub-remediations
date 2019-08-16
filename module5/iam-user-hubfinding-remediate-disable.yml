@@ -14,7 +14,7 @@ policies:
       - type: event
         key: detail.Severity.Normalized
         value: 50
-        op: gte
+        value_type: integer
     actions: 
       - type: remove-keys
         disable: true
