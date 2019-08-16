@@ -147,7 +147,6 @@ Resources:
               - "securityhub:BatchImportFindings"
               - "securityhub:CreateActionTarget"
               - "securityhub:UpdateActionTarget"
-              - "securityhub:Describe*"
             Resource: "*"
           -
             Sid: "CCLogs"
