@@ -1,28 +1,27 @@
 # securityhub-remediations
-Workshop for implementing rmediations using AWS Security Hub and Cloud Custodian
+Workshop for implementing remediations using AWS Security Hub and Cloud Custodian
 
 # Overview
-In this workshop you will learn how to implement automated remediations of findings submitted to Security Hub.
+In this workshop you will learn how to implement automated remediations of findings submitted to [Security Hub](https://aws.amazon.com/security-hub/) leveraging an open source tool named [Cloud Custodian](https://cloudcustodian.io/)
 
 
 * Level: Intermediate
-* Duration: 1:30 - 2:00 hours
+* Duration: 1:00 - 2:00 hours
 * CSF Functions: Detect, Respond
 * CAF Components: Detective, Responsive
 
 # Prerequisites
 
-1. You will need an AWS account for this workshop and administrative credentials, with console and aws cli access. 
-2. We suggest you use a new/clean account, or at least one in which can tolerate the terminatation, stopping, and/or deleting of resources.
-3. You will incur charges for the AWS resources used in this workshop. The charges for some of the resources may be covered through the AWS Free Tier. The demo uses free tier choices wherever possible.
-4. You must run this workshop in a region supported by AWS Security Hub (https://docs.aws.amazon.com/general/latest/gr/rande.html#sechub_region).  We recommended using the us-east-1 region.
-5. You must run this workshop in a region support by AWS Cloud9 (https://docs.aws.amazon.com/general/latest/gr/rande.html#cloud9_region), 
+1. You will need an [AWS account](https://aws.amazon.com/account/) for this workshop and administrative credentials, with console and [aws cli access](https://docs.aws.amazon.com/cli/latest/userguide/cli-configure-files.html). 
+2. We suggest you use a new/clean account, or at least one in which can tolerate the terminatation, stopping, and/or deleting of resources, and doesn't already have automated remediations of security groups or EC2 instances with public access, or removal of IAM users.
+3. You will incur charges for the AWS resources used in this workshop. The charges for some of the resources may be covered through the [AWS Free Tier](https://aws.amazon.com/free/). The demo uses free tier choices wherever possible.
+4. You must run this workshop in a [region supported by AWS Security Hub](https://docs.aws.amazon.com/general/latest/gr/rande.html#sechub_region).  We recommended using the us-east-1 region.
+5. You must run this workshop in a region support by [AWS Cloud9](https://docs.aws.amazon.com/general/latest/gr/rande.html#cloud9_region), 
 or be comfortable setting up a docker environment with aws credentials in the host env.
 6. You need to have GuardDuty enabled on the account for module 2 and 5 to work, if not follow https://docs.aws.amazon.com/guardduty/latest/ug/guardduty_settingup.html#guardduty_enable-gd 
 7. If any of your existing ec2 instances have their tag:Name=RemediationTestTarget then please rename them as instances with this value will be the target for actions during this workshop
 8. Resources will be created in the default vpc.  If you don't have a default vpc, you will need to modify the commands to specify the vpc you want to use.
-9. A git client to download the workshop files
-10. If your account already has automated remediations which respond to security groups with public ingress, ec2 instances with public ips, please use an account which doesn't have those remediations, or temporary turn them off, otherwise race conditions will lead to results which don't match what this workshop describes.
+9. A git client to download the workshop files.
 
 # Modules
 
@@ -144,10 +143,13 @@ aws ec2 associate-iam-instance-profile --iam-instance-profile Name=Cloud9Instanc
 ```
 docker run -it -v /home/ec2-user/environment/securityhub-remediations/output:/home/custodian/output:rw -v /home/ec2-user/environment/securityhub-remediations:/home/custodian/securityhub-remediations:ro -v /home/ec2-user/.aws:/home/custodian/.aws:ro cloudcustodian/c7n run --cache-period 0 -s /home/custodian/output --profile cc -c /home/custodian/securityhub-remediations/module5/iam-user-hubfinding-remediate-disable.yml
 ```
-2. Run the following command, which creates a sample finding in GuardDuty, which automatically get imported into SecurityHub, which is an finding type ['UnauthorizedAccess:IAMUser/MaliciousIPCaller'](https://docs.aws.amazon.com/guardduty/latest/ug/guardduty_unauthorized.html#unauthorized5) on an IAMUser named GeneratedFindingUserName, which was created by cloudformation script in module 1.
+2.  Verify that the previous command resulted in output containing "Provisioning policy lambda iam-user-hubfinding-remediate-disable"
+3.  Run the following command, which creates a sample finding in GuardDuty, which automatically get imported into SecurityHub, which is an finding type ['UnauthorizedAccess:IAMUser/MaliciousIPCaller'](https://docs.aws.amazon.com/guardduty/latest/ug/guardduty_unauthorized.html#unauthorized5) on an IAMUser named GeneratedFindingUserName, which was created by cloudformation script in module 1.
 ```
 aws guardduty create-sample-findings --detector-id `aws guardduty list-detectors --profile cc --query DetectorIds --output text` --finding-types 'UnauthorizedAccess:IAMUser/MaliciousIPCaller'
 ```
-3. Validation steps TODO
+4.  First, validate that Guard Duty generated the sample finding by going to the Guard Duty Console and look for the finding type "UnauthorizedAccess:IAMUser/MaliciousIPCaller"
+5.  While it can take a few minutes for the finding to show up in the Security Hub console, look for the finding Title = "API GeneratedFindingAPIName was invoked from a known malicious IP address."
+6.  Look within the CloudWatch Logs, remember the pattern of /aws/lambda/custodian-$(name of the cloud custodian policy) 
 
 
