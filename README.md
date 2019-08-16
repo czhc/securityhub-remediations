@@ -33,11 +33,12 @@ or be comfortable setting up a docker environment with aws credentials in the ho
 
 
 ## Module 1 - Environment Build and Configuration
-0. If you don't already have SecurityHub enabled in the account and region you plan on using, then run "aws securityhub enable-security-hub" 
-1. Run "git clone https://github.com/FireballDWF/securityhub-remediations.git"
-2. Launch cloudformation to setup the environment
+0.  If you don't already have SecurityHub enabled in the account and region you plan on using, then run "aws securityhub enable-security-hub" 
+1.  Run "git clone https://github.com/FireballDWF/securityhub-remediations.git"
+2.  Launch cloudformation to setup the environment
     1. Use the console to launch a cloudformation stack using the template module1/securityhub-remediations-workshop.yml as if you launch from the cli, the role must match your console role otherwise you won't be able to see the Cloud9 Environment IDE.
-3. Setup AWS credentials for the Cloud9 environment
+3.  Run "export SECHUBWORKSHOP_CONTAINER=cloudcustodian/c7n"
+3.  Setup AWS credentials for the Cloud9 environment
     1. Open the EC2 Console - https://console.aws.amazon.com/ec2/v2/home?region=us-east-1#Home:
     2. Click "Instances"
     3. Click the checkbox for the instance name beginning with "aws-cloud9-SecHubWorkshop"
@@ -54,15 +55,15 @@ or be comfortable setting up a docker environment with aws credentials in the ho
     14. Click "Save"
     15. Test the AWS Credentials by going to the IDE's terminal window then enter "aws s3 ls --profile cc"
     16. If you get AccessDenied, then review the edits (usual suspects are leaving the braces in, or including dashes in the account number) you made to ~/.aws and step 5 as you need to have working credentials for CloudCustodian to be able to make aws api calls.
-4. Install Cloud Custodian
+4.  Install Cloud Custodian
     1. To install Cloud Custodian, just run the following in the bash terminal window of Cloud9:
 ```
 docker pull cloudcustodian/c7n 
 ```
-5. Test first Cloud Custodian Policy, which reports that the ec2 instance created in the cloudformation has a vulnerability
+5.  Test first Cloud Custodian Policy, which reports that the ec2 instance created in the cloudformation has a vulnerability
     1. Run the following:
 ```
-docker run -it -v /home/ec2-user/environment/securityhub-remediations/output:/home/custodian/output:rw -v /home/ec2-user/environment/securityhub-remediations:/home/custodian/securityhub-remediations:ro -v /home/ec2-user/.aws:/home/custodian/.aws:ro cloudcustodian/c7n run --cache-period 0 -s /home/custodian/output --profile cc -c /home/custodian/securityhub-remediations/module1/force-vulnerability-finding.yml  
+docker run -it -v /home/ec2-user/environment/securityhub-remediations/output:/home/custodian/output:rw -v /home/ec2-user/environment/securityhub-remediations:/home/custodian/securityhub-remediations:ro -v /home/ec2-user/.aws:/home/custodian/.aws:ro $(SECHUBWORKSHOP_CONTAINER) run --cache-period 0 -s /home/custodian/output --profile cc -c /home/custodian/securityhub-remediations/module1/force-vulnerability-finding.yml  
 ```
 
     You should expect to see 2 output lines, one containing "count:1" and another containing "resources:1", similar to the following output.  If you get an error on "batch-import-findings" then it means you have not enabled SecurityHub in the account and region.
@@ -81,7 +82,7 @@ docker run -it -v /home/ec2-user/environment/securityhub-remediations/output:/ho
 | -v /home/ec2-user/environment/securityhub-remediations/output:/home/custodian/output:rw | maps a directory for the output of Cloud Custodian custodian between the container host and the container instance and is read/write enabled |
 | -v /home/ec2-user/environment/securityhub-remediations:/home/custodian/securityhub-remediations:ro|map the files for the workshop into the container so the cloud custodian policies are available insider the container. volume is mapped in ReadOnly mode |
 | -v /home/ec2-user/.aws:/home/custodian/.aws:ro | maps the [aws cli configuration files](https://docs.aws.amazon.com/cli/latest/userguide/cli-configure-files.html) into the container in read-only mode.  Cloud Custodian uses the same configuration files, as both use the [boto3 Python SDK](https://boto3.amazonaws.com/v1/documentation/api/latest/index.html) |
-| cloudcustodian/c7n | Container image which is downloaded from https://hub.docker.com/r/cloudcustodian/c7n |
+| $(SECHUBWORKSHOP_CONTAINER) | evaluates to cloudcustodian/c7n which is the docker container image which is downloaded from https://hub.docker.com/r/cloudcustodian/c7n |
 | run | instructs Cloud Custodian to run a policy. This is the first part of the command line which is passed to CloudCustodian |
 | --cache-period 0 | disables cloud custodian's caching of api call results |
 | -s /home/custodian/output | specifies where log and resource data is placed | 
@@ -103,7 +104,7 @@ docker run -it -v /home/ec2-user/environment/securityhub-remediations/output:/ho
 9. Optional, you can use the AWS Console and/or cli to confirm that the instance named "RemediationTestTarget" has really be stopped, snapshotted, and the IAM Instance Profile dissassociated.
 10. Now run the following command to reassociate the InstanceProfile so the instance is ready for the next module.
 ```
-aws ec2 associate-iam-instance-profile --iam-instance-profile Name=Cloud9Instance --instance-id $(aws ec2 describe-instances --filters "Name=tag:Name,Values=RemediationTestTarget" --query Reservations[*].Instances[*].[InstanceId] --output text)
+aws ec2 associate-iam-instance-profile --iam-instance-profile Name=Cloud9Instance --instance-id $(aws ec2 describe-instances --filters "Name=tag:Name,Values=RemediationTestTarget Name=instance-state-name,Values=stopped" --query Reservations[*].Instances[*].[InstanceId] --output text)
 ```
 11. Now run the following command to start the instance so the instance is ready for the next module.
 ```

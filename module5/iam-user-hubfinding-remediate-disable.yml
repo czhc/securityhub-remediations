@@ -9,8 +9,12 @@ policies:
         memory: 128
     filters:
       - type: event
-        key: detail.findings[].Types[0]
+        key: detail.findings[0].Types[0]
         value: "TTPs/UnauthorizedAccess:IAMUser-MaliciousIPCaller"
+      - type: event
+        key: detail.Severity.Normalized
+        value: 50
+        op: gte
     actions: 
       - type: remove-keys
         disable: true
