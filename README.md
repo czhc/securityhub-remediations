@@ -34,7 +34,7 @@ or be comfortable setting up a docker environment with aws credentials in the ho
 
 ## Module 1 - Environment Build and Configuration
 0. If you don't already have SecurityHub enabled in the account and region you plan on using, then run "aws securityhub enable-security-hub" 
-1. Run "git clone https://github.com/FireballDWF/securityhub-remediations.git && cd securityhub-remediations && mkdir output"
+1. Run "git clone https://github.com/FireballDWF/securityhub-remediations.git"
 2. Launch cloudformation to setup the environment
     1. Use the console to launch a cloudformation stack using the template module1/securityhub-remediations-workshop.yml as if you launch from the cli, the role must match your console role otherwise you won't be able to see the Cloud9 Environment IDE.
 3. Setup AWS credentials for the Cloud9 environment
@@ -46,7 +46,7 @@ or be comfortable setting up a docker environment with aws credentials in the ho
     6. Click Apply.
     7. Open https://us-east-1.console.aws.amazon.com/cloud9/home?region=us-east-1
     8. In the box for "SecHubWorkshop", click "Open IDE"
-    9. Find the terminal session at the bottom which starts with "bash" and use it to run: "git clone https://github.com/FireballDWF/securityhub-remediations.git && cd securityhub-remediations" so that you have a copy of the workshop files on your Cloud9 instance
+    9. Find the terminal session at the bottom which starts with "bash" and use it to run: "git clone https://github.com/FireballDWF/securityhub-remediations.git && cd securityhub-remediations && mkdir output" so that you have a copy of the workshop files on your Cloud9 instance and have a directory for output from Cloud Custodian
     10. Within the Cloud9 browser tab, open the file securityhub-remediations/module1/config
     11. Replace "{AWS_ACCOUNT_NUMBER}" with your AWS account number. Replacing the braces is important, and the account number must not contain dashes, this needs to be a valid arn.
     12. Click File->Save As
