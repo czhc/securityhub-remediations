@@ -14,15 +14,12 @@ policies:
         value_type: swap
         op: in
         value: "0.0.0.0/0" # anywhere
-      - or:
-          - type: check-permissions
-            match: allowed
-            actions:
-            - s3:GetObject
-          - type: check-permissions
-            match: allowed
-            actions:
-            - s3:* 
+      - type: check-permissions
+        match: allowed
+        match-operator: or
+        actions:
+          - s3:GetObject
+          - s3:* 
     actions:
       - type: post-finding
         severity_normalized: 70
