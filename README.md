@@ -43,7 +43,8 @@ or be comfortable setting up a docker environment with aws credentials in the ho
 aws ec2 associate-iam-instance-profile --iam-instance-profile Name=Cloud9Instance --instance-id $(aws ec2 describe-instances --filters Name=tag:Name,Values="aws-cloud9-SecHubWorkshop*" --query Reservations[*].Instances[*].[InstanceId] --output text)
 ```
 5.  Find the terminal session at the bottom which starts with "bash" and use it to run the following command so that you have a copy of the workshop files on your Cloud9 instance and have a directory for output from Cloud Custodian: 
-```git clone https://github.com/FireballDWF/securityhub-remediations.git && cd securityhub-remediations && mkdir output
+```
+git clone https://github.com/FireballDWF/securityhub-remediations.git && cd securityhub-remediations && mkdir output
 ```
 6.  Run the following in the same Cloud9 terminal to setup an environment varible required by upcoming commands:
 ```
