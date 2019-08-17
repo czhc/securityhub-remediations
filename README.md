@@ -148,12 +148,24 @@ docker run -it --rm -v /home/ec2-user/environment/securityhub-remediations/outpu
 2.  Verify that the previous command resulted in output containing "Provisioning policy lambda iam-user-hubfinding-remediate-disable"
 3.  Run the following command, which creates a sample finding in GuardDuty, which automatically get imported into SecurityHub, which is an finding type ['UnauthorizedAccess:IAMUser/MaliciousIPCaller'](https://docs.aws.amazon.com/guardduty/latest/ug/guardduty_unauthorized.html#unauthorized5) on an IAMUser named GeneratedFindingUserName, which was created by cloudformation script in module 1.
 ```
-# Archive any existing findings in SecHub (and Guardduty only if needed)
-aws securityhub 
+Archive any existing findings in SecHub
+```
+aws securityhub update-findings --record-state ARCHIVED --filters '{"ResourceAwsIamAccessKeyUserName":[{"Value": "GeneratedFindingUserName","Comparison":"EQUALS"}]}' --profile cc
 aws guardduty create-sample-findings --detector-id `aws guardduty list-detectors --profile cc --query DetectorIds --output text` --finding-types 'UnauthorizedAccess:IAMUser/MaliciousIPCaller'
 ```
+aws guardduty archive-findings \
+    --detector-id \
+        $(aws guardduty list-detectors --query DetectorIds --output text) \
+    --finding-ids \
+        $(aws guardduty list-findings \
+            --detector-id \
+                $(aws guardduty list-detectors --query DetectorIds --output text) \
+            --finding-criteria '{"Criterion": {"service.archived": {"Eq": ["false"]},"resource.accessKeyDetails.userName": {"Eq":["GeneratedFindingUserName"]}}}' \
+            --query 'FindingIds[0]' --output text)
+```
 4.  First, validate that Guard Duty generated the sample finding by going to the Guard Duty Console and look for the finding type "UnauthorizedAccess:IAMUser/MaliciousIPCaller"
-5.  While it can take a few minutes for the finding to show up in the Security Hub console, look for the finding Title = "API GeneratedFindingAPIName was invoked from a known malicious IP address."
+5.  While it can take a few minutes for the finding to show up in the Security Hub console, look for the finding Title = "API GeneratedFindingAPIName was invoked from a known malicious IP address." or use the following URL to search: https://console.aws.amazon.com/securityhub/home?region=us-east-1#/findings?search=RecordState%3D%255Coperator%255C%253AEQUALS%255C%253AACTIVE%26ResourceAwsIamAccessKeyUserName%3D%255Coperator%255C%253AEQUALS%255C%253AGeneratedFindingUserName
 6.  Look within the CloudWatch Logs, remember the pattern of /aws/lambda/custodian-$(name of the cloud custodian policy) 
+7.  
 
 

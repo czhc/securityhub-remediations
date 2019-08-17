@@ -28,6 +28,7 @@ Resources:
               - "ec2:StartInstance"
               - "ec2:Describe*"
               - "guardduty:CreateSampleFindings"
+              - "guardduty:ArchiveFindings"
             Resource: "*"
           -    
             Effect: "Allow"
