@@ -2,7 +2,9 @@
 Workshop for implementing remediations using AWS Security Hub and Cloud Custodian
 
 # Overview
-In this workshop you will learn how to implement automated remediations of findings submitted to [Security Hub](https://aws.amazon.com/security-hub/) leveraging an open source tool named [Cloud Custodian](https://cloudcustodian.io/)
+In this workshop you will learn how to implement automated remediations of findings submitted to [Security Hub](https://aws.amazon.com/security-hub/) leveraging an open source tool named [Cloud Custodian](https://cloudcustodian.io/), with no prior knowledge of either is required.  
+
+However, this workshop is not intended to to provide a complete introduction to writing polices for Cloud Custodian, for that please refer to the [Getting Started documentation](https://cloudcustodian.io/docs/aws/gettingstarted.html) or alternatively the [introductory presentation on Cloud Custodian](https://www.socallinuxexpo.org/sites/default/files/presentations/CloudCustodian%40Scale17x.pdf)
 
 
 * Level: Intermediate
@@ -37,7 +39,7 @@ or be comfortable setting up a docker environment with aws credentials in the ho
 1.  Run "git clone https://github.com/FireballDWF/securityhub-remediations.git"
 2.  Launch cloudformation to setup the environment
     1. Use the console to launch a cloudformation stack using the template module1/securityhub-remediations-workshop.yml as if you launch from the cli, the role must match your console role otherwise you won't be able to see the Cloud9 Environment IDE.
-3.  Run "export SECHUBWORKSHOP_CONTAINER=${SECHUBWORKSHOP_CONTAINER}"
+3.  Run "export SECHUBWORKSHOP_CONTAINER=cloudcustodian/c7n"
 3.  Setup AWS credentials for the Cloud9 environment
     1. Open the EC2 Console - https://console.aws.amazon.com/ec2/v2/home?region=us-east-1#Home:
     2. Click "Instances"
