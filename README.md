@@ -144,7 +144,7 @@ docker run -it --rm -v /home/ec2-user/environment/securityhub-remediations/outpu
 ```
 aws ec2 associate-iam-instance-profile --iam-instance-profile Name=Cloud9Instance --instance-id $(aws ec2 describe-instances --filters "Name=tag:Name,Values=RemediationTestTarget" --query Reservations[*].Instances[*].[InstanceId] --output text)
 ```
-
+6.  Future Addition: Similar policy as a config rule
 ## Module 5 - Automated Remediations - GuardDuty Event on IAMUser
 1. Run the following command,
 ```
@@ -160,7 +160,7 @@ aws guardduty archive-findings \
         $(aws guardduty list-findings \
             --detector-id \
                 $(aws guardduty list-detectors --query DetectorIds --output text) \
-            --finding-criteria '{"Criterion": {"service.archived": {"Eq": ["false"]},"resource.accessKeyDetails.userName": {"Eq":["GeneratedFindingUserName"]}}}' \
+            --finding-criteria '{"Criterion": {"service.archived": {"Eq":["false"]}, \ "resource.accessKeyDetails.userName": {"Eq":["GeneratedFindingUserName"]}}}' \
             --query 'FindingIds[0]' --output text)
 ```
 4.  Archive any existing findings of this type in Security Hub, to be on the safe side.
@@ -171,13 +171,13 @@ aws securityhub update-findings --record-state ARCHIVED --filters '{"ResourceAws
 ```
 aws guardduty create-sample-findings --detector-id `aws guardduty list-detectors --profile cc --query DetectorIds --output text` --finding-types 'UnauthorizedAccess:IAMUser/MaliciousIPCaller'
 ```
-4.  First, validate that Guard Duty generated the sample finding by going to the Guard Duty Console and look for the finding type "UnauthorizedAccess:IAMUser/MaliciousIPCaller"
-5.  While it can take a few minutes for the finding to show up in the Security Hub console, look for the finding Title = "API GeneratedFindingAPIName was invoked from a known malicious IP address." or use the following URL to search: https://console.aws.amazon.com/securityhub/home?region=us-east-1#/findings?search=RecordState%3D%255Coperator%255C%253AEQUALS%255C%253AACTIVE%26ResourceAwsIamAccessKeyUserName%3D%255Coperator%255C%253AEQUALS%255C%253AGeneratedFindingUserName
-6.  Look within the CloudWatch Logs, remember the LogGroup pattern of /aws/lambda/custodian-$(name of the cloud custodian policy).  You are looking a lines containing "policy:iam-user-hubfinding-remediate-disable invoking action:userremoveaccesskey resources:1" followed by a line containing "metric:ApiCalls Count:2 policy:iam-user-hubfinding-remediate-disable restype:iam-user", if they don't appear will need to troubleshoot using the logs.
-7.  Validate that the Access Keys were actually removed from the user by running the following command:
+6.  First, validate that Guard Duty generated the sample finding by going to the Guard Duty Console and look for the finding type "UnauthorizedAccess:IAMUser/MaliciousIPCaller"
+7.  While it can take a few minutes for the finding to show up in the Security Hub console, look for the finding Title = "API GeneratedFindingAPIName was invoked from a known malicious IP address." or use the following URL to search: https://console.aws.amazon.com/securityhub/home?region=us-east-1#/findings?search=RecordState%3D%255Coperator%255C%253AEQUALS%255C%253AACTIVE%26ResourceAwsIamAccessKeyUserName%3D%255Coperator%255C%253AEQUALS%255C%253AGeneratedFindingUserName
+8.  Look within the CloudWatch Logs, remember the LogGroup pattern of /aws/lambda/custodian-$(name of the cloud custodian policy).  You are looking a lines containing "policy:iam-user-hubfinding-remediate-disable invoking action:userremoveaccesskey resources:1" followed by a line containing "metric:ApiCalls Count:2 policy:iam-user-hubfinding-remediate-disable restype:iam-user", if they don't appear will need to troubleshoot using the logs.
+9.  Validate that the Access Keys were actually removed from the user by running the following command:
 ```
 aws iam list-access-keys --user-name GeneratedFindingUserName
 ```
-8. Evaluate the output by looking for "Status"="Inactive"
+10. Evaluate the output by looking for "Status"="Inactive"
 
 
