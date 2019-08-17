@@ -35,34 +35,36 @@ or be comfortable setting up a docker environment with aws credentials in the ho
 
 
 ## Module 1 - Environment Build and Configuration
-0.  If you don't already have SecurityHub enabled in the account and region you plan on using, then run "aws securityhub enable-security-hub" 
-1.  Run "git clone https://github.com/FireballDWF/securityhub-remediations.git"
-2.  Launch cloudformation to setup the environment
-    1. Use the console to launch a cloudformation stack using the template module1/securityhub-remediations-workshop.yml as if you launch from the cli, the role must match your console role otherwise you won't be able to see the Cloud9 Environment IDE.
-3.  Run "export SECHUBWORKSHOP_CONTAINER=cloudcustodian/c7n"
-3.  Setup AWS credentials for the Cloud9 environment
-    1. Open the EC2 Console - https://console.aws.amazon.com/ec2/v2/home?region=us-east-1#Home:
-    2. Click "Instances"
-    3. Click the checkbox for the instance name beginning with "aws-cloud9-SecHubWorkshop"
-    4. Click the "Actions" button, then in the menu popup, click "Instance Settings", then "Attach/Replace IAM Role".
-    5. In the "IAM role" box, select the "Cloud9Instance" role
-    6. Click Apply.
-    7. Open https://us-east-1.console.aws.amazon.com/cloud9/home?region=us-east-1
-    8. In the box for "SecHubWorkshop", click "Open IDE"
-    9. Find the terminal session at the bottom which starts with "bash" and use it to run: "git clone https://github.com/FireballDWF/securityhub-remediations.git && cd securityhub-remediations && mkdir output" so that you have a copy of the workshop files on your Cloud9 instance and have a directory for output from Cloud Custodian
-    10. Within the Cloud9 browser tab, open the file securityhub-remediations/module1/config
-    11. Replace "{AWS_ACCOUNT_NUMBER}" with your AWS account number. Replacing the braces is important, and the account number must not contain dashes, this needs to be a valid arn.
-    12. Click File->Save As
-    13. In Folder, enter "~/.aws"
-    14. Click "Save"
-    15. Test the AWS Credentials by going to the IDE's terminal window then enter "aws s3 ls --profile cc"
-    16. If you get AccessDenied, then review the edits (usual suspects are leaving the braces in, or including dashes in the account number) you made to ~/.aws and step 5 as you need to have working credentials for CloudCustodian to be able to make aws api calls.
-4.  Install Cloud Custodian
+1.  If you don't already have SecurityHub enabled in the account and region you plan on using, then run "aws securityhub enable-security-hub" 
+2.  Run "wget https://github.com/FireballDWF/securityhub-remediations/blob/master/module1/securityhub-remediations-workshop.yml" which downloads a copy of the cloudformation template used in the next step.  Alternatively if you don't have a wget, you could use curl or your browser to download the same url.
+3.  Use the AWS Console to launch a cloudformation stack using the template downloaded in the previous step. If if you launch from the cli, the role must match your console role otherwise you won't be able to see the Cloud9 Environment IDE.
+4.  Assign an IAM Instance Profile to the ec2 instance for the Cloud9 environment
+```
+aws ec2 associate-iam-instance-profile --iam-instance-profile Name=Cloud9Instance --instance-id $(aws ec2 describe-instances --filters Name=tag:Name,Values="aws-cloud9-SecHubWorkshop*" --query Reservations[*].Instances[*].[InstanceId] --output text)
+```
+5.  Find the terminal session at the bottom which starts with "bash" and use it to run the following command so that you have a copy of the workshop files on your Cloud9 instance and have a directory for output from Cloud Custodian: 
+```git clone https://github.com/FireballDWF/securityhub-remediations.git && cd securityhub-remediations && mkdir output
+```
+6.  Run the following in the same Cloud9 terminal to setup an environment varible required by upcoming commands:
+```
+export AWS_ACCOUNT_ID=$(aws sts get-caller-identity --query Account --output text)
+```
+7.  Configure credentials for deploying cloud custodian by running the following:
+```
+echo -e "[profile cc]\nregion = us-east-1\nrole_arn = arn:aws:iam::${AWS_ACCOUNT_ID}:role/CloudCustodian\ncredential_source = Ec2InstanceMetadata\nrole_session_name = cloudcustodian-via-cli" >>~/.aws/config 
+```
+8.  Test the ability to use the new credentials profile named cc
+```
+aws s3 ls --profile cc
+```
+9.  If you get AccessDenied, then troubleshoot the cli credentials issue as they are required by rest of the modules 
+10.  Install Cloud Custodian
     1. To install Cloud Custodian, just run the following in the bash terminal window of Cloud9:
 ```
+export SECHUBWORKSHOP_CONTAINER=cloudcustodian/c7n
 docker pull ${SECHUBWORKSHOP_CONTAINER} 
 ```
-5.  Test first Cloud Custodian Policy, which reports that the ec2 instance created in the cloudformation has a vulnerability
+11.  Test first Cloud Custodian Policy, which reports that the ec2 instance created in the cloudformation has a vulnerability
     1. Run the following:
 ```
 docker run -it --rm -v /home/ec2-user/environment/securityhub-remediations/output:/home/custodian/output:rw -v /home/ec2-user/environment/securityhub-remediations:/home/custodian/securityhub-remediations:ro -v /home/ec2-user/.aws:/home/custodian/.aws:ro ${SECHUBWORKSHOP_CONTAINER} run --cache-period 0 -s /home/custodian/output --profile cc -c /home/custodian/securityhub-remediations/module1/force-vulnerability-finding.yml  
