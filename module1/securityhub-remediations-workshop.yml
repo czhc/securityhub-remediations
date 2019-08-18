@@ -234,6 +234,7 @@ Resources:
     Properties: 
       GroupDescription: "SecurityHub Remediation Test Target" 
       GroupName: "SecurityHubRemediationsTestTarget"
+      VpcId: !Ref "VpcId"
       Tags: 
         - 
           Key: "Name"
