@@ -21,8 +21,8 @@ Your feedback is highly desired, please [submit a new issue](https://github.com/
 4.  You must run this workshop in a [region supported by AWS Security Hub](https://docs.aws.amazon.com/general/latest/gr/rande.html#sechub_region).  We recommended using the us-east-1 region.
 5.  You must run this workshop in a region support by [AWS Cloud9](https://docs.aws.amazon.com/general/latest/gr/rande.html#cloud9_region), 
 or be comfortable setting up a docker environment with aws credentials in the host env.
-7.  If any of your existing ec2 instances have their tag:Name=RemediationTestTarget then please rename them as instances with this value will be the target for actions during this workshop
-8.  If you choose to install into an existing, rather than enabling the option to create a new VPC, be aware of the following:
+6.  If any of your existing ec2 instances have their tag:Name=RemediationTestTarget then please rename them as instances with this value will be the target for actions during this workshop
+7.  If you choose to install into an existing, rather than enabling the option to create a new VPC, be aware of the following:
     1.  VPC needs to have a connectivity to the following service's endpoints, such as thru a IGW or TGW:
         1.  EC2 - could also be via VPCEndpoints
         2.  Lambda - could also be via VPCEndpoints
@@ -45,32 +45,33 @@ or be comfortable setting up a docker environment with aws credentials in the ho
 
 
 ## Module 1 - Environment Build and Configuration
+
 1.  If you don't already have SecurityHub enabled in the account and region you plan on using, then run "aws securityhub enable-security-hub" 
 2.  You need to have GuardDuty enabled on the account for module 2 and 5 to work, if not yet then either run the following command or follow the [steps to enable on the console]( https://docs.aws.amazon.com/guardduty/latest/ug/guardduty_settingup.html#guardduty_enable-gd)
 ```
 aws guardduty create-detector --enable
 ```
-2.  Run "wget https://github.com/FireballDWF/securityhub-remediations/blob/master/module1/securityhub-remediations-workshop.yml" which downloads a copy of the cloudformation template used in the next step.  Alternatively if you don't have a wget, you could use curl or your browser to download the same url.
-3.  Use the AWS Console to launch a cloudformation stack using the template downloaded in the previous step. If if you launch from the cli, the role must match your console role otherwise you won't be able to see the Cloud9 Environment IDE.
-4.  Assign an IAM Instance Profile to the ec2 instance for the Cloud9 environment
+3.  Run "wget https://github.com/FireballDWF/securityhub-remediations/blob/master/module1/securityhub-remediations-workshop.yml" which downloads a copy of the cloudformation template used in the next step.  Alternatively if you don't have a wget, you could use curl or your browser to download the same url.
+4.  Use the AWS Console to launch a cloudformation stack using the template downloaded in the previous step. If if you launch from the cli, the role must match your console role otherwise you won't be able to see the Cloud9 Environment IDE.
+5.  Assign an IAM Instance Profile to the ec2 instance for the Cloud9 environment
 ```
 aws ec2 associate-iam-instance-profile --iam-instance-profile Name=SecurityHubRemediationWorkshopCli --instance-id $(aws ec2 describe-instances --filters Name=tag:Name,Values="aws-cloud9-SecHubWorkshop*" Name=instance-state-name,Values=running --query Reservations[*].Instances[*].[InstanceId] --output text)
 ```
-5.  Find the terminal session at the bottom which starts with "bash" and use it to run the following commands so that you have a copy of the workshop files on your Cloud9 instance and have a directory for output from Cloud Custodian: 
+6.  Find the terminal session at the bottom which starts with "bash" and use it to run the following commands so that you have a copy of the workshop files on your Cloud9 instance and have a directory for output from Cloud Custodian: 
 ```
 git clone https://github.com/FireballDWF/securityhub-remediations.git
 cd securityhub-remediations
 mkdir output
 ```
-6.  Run the following in the same Cloud9 terminal to setup an environment varible required by upcoming commands:
+7.  Run the following in the same Cloud9 terminal to setup an environment varible required by upcoming commands:
 ```
 export AWS_ACCOUNT_ID=$(aws sts get-caller-identity --query Account --output text)
 ```
-7.  The following environment variable sets the default region to use, change it from us-east-1 if desired, then run it:
+8.  The following environment variable sets the default region to use, change it from us-east-1 if desired, then run it:
 ```
 export AWS_DEFAULT_REGION=us-east-1
 ```
-7.  Configure credentials for deploying cloud custodian by running the following, and change the region if not targeting us-east-1:
+9.  Configure credentials for deploying cloud custodian by running the following, and change the region if not targeting us-east-1:
 ```
 echo -e "[profile cc]\n\
 region = ${AWS_DEFAULT_REGION}\n\
@@ -78,18 +79,18 @@ role_arn = arn:aws:iam::${AWS_ACCOUNT_ID}:role/CloudCustodianCli\n\
 credential_source = Ec2InstanceMetadata\n\
 role_session_name = cloudcustodian-via-cli\n"  >>~/.aws/config 
 ```
-8.  Test the ability to use the new credentials profile named cc
+10.  Test the ability to use the new credentials profile named cc
 ```
 aws s3 ls --profile cc
 ```
-9.  If you get AccessDenied, then troubleshoot the cli credentials issue as they are required by rest of the modules.  If you get "Invalid endpoint: https://s3..amazonaws.com" then you missed the step setting AWS_DEFAULT_REGION.  If you get "An error occurred (InvalidClientTokenId) when calling the AssumeRole operation: The security token included in the request is invalid." then you likely did not perform the step to run the command which starts with "aws ec2 associate-iam-instance-profile"
-10.  Install Cloud Custodian
+11.  If you get AccessDenied, then troubleshoot the cli credentials issue as they are required by rest of the modules.  If you get "Invalid endpoint: https://s3..amazonaws.com" then you missed the step setting AWS_DEFAULT_REGION.  If you get "An error occurred (InvalidClientTokenId) when calling the AssumeRole operation: The security token included in the request is invalid." then you likely did not perform the step to run the command which starts with "aws ec2 associate-iam-instance-profile"
+12.  Install Cloud Custodian
     1. To install Cloud Custodian, just run the following in the bash terminal window of Cloud9:
 ```
 export SECHUBWORKSHOP_CONTAINER=cloudcustodian/c7n
 docker pull ${SECHUBWORKSHOP_CONTAINER} 
 ```
-11.  Test first Cloud Custodian Policy, which reports that the ec2 instance created in the cloudformation has a vulnerability
+13.  Test first Cloud Custodian Policy, which reports that the ec2 instance created in the cloudformation has a vulnerability
     1. Run the following:
 ```
 docker run -it --rm -v /home/ec2-user/environment/securityhub-remediations/output:/home/custodian/output:rw -v /home/ec2-user/environment/securityhub-remediations:/home/custodian/securityhub-remediations:ro -v /home/ec2-user/.aws:/home/custodian/.aws:ro ${SECHUBWORKSHOP_CONTAINER} run --cache-period 0 -s /home/custodian/output --profile cc -c /home/custodian/securityhub-remediations/module1/force-vulnerability-finding.yml  
