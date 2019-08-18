@@ -5,6 +5,7 @@ policies:
         type: hub-finding
         role: arn:aws:iam::{account_id}:role/CloudCustodian
         packages: [botocore, boto3, urllib3]
+        memory: 128
     filters:
       - type: event
         key: detail.findings[].ProductFields.aws/securityhub/ProductName

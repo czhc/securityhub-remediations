@@ -52,17 +52,27 @@ or be comfortable setting up a docker environment with aws credentials in the ho
 ```
 aws ec2 associate-iam-instance-profile --iam-instance-profile Name=Cloud9Instance --instance-id $(aws ec2 describe-instances --filters Name=tag:Name,Values="aws-cloud9-SecHubWorkshop*" --query Reservations[*].Instances[*].[InstanceId] --output text)
 ```
-5.  Find the terminal session at the bottom which starts with "bash" and use it to run the following command so that you have a copy of the workshop files on your Cloud9 instance and have a directory for output from Cloud Custodian: 
+5.  Find the terminal session at the bottom which starts with "bash" and use it to run the following commands so that you have a copy of the workshop files on your Cloud9 instance and have a directory for output from Cloud Custodian: 
 ```
-git clone https://github.com/FireballDWF/securityhub-remediations.git && cd securityhub-remediations && mkdir output
+git clone https://github.com/FireballDWF/securityhub-remediations.git
+cd securityhub-remediations
+mkdir output
 ```
 6.  Run the following in the same Cloud9 terminal to setup an environment varible required by upcoming commands:
 ```
 export AWS_ACCOUNT_ID=$(aws sts get-caller-identity --query Account --output text)
 ```
-7.  Configure credentials for deploying cloud custodian by running the following:
+7.  The following environment variable sets the default region to use, change it from us-east-1 if desired, then run it:
 ```
-echo -e "[profile cc]\nregion = us-east-1\nrole_arn = arn:aws:iam::${AWS_ACCOUNT_ID}:role/CloudCustodian\ncredential_source = Ec2InstanceMetadata\nrole_session_name = cloudcustodian-via-cli" >>~/.aws/config 
+export AWS_DEFAULT_REGION=us-east-1
+```
+7.  Configure credentials for deploying cloud custodian by running the following, and change the region if not targeting us-east-1:
+```
+echo -e "[profile cc]\n\
+region = ${AWS_DEFAULT_REGION}\n\
+role_arn = arn:aws:iam::${AWS_ACCOUNT_ID}:role/CloudCustodianCli\n\
+credential_source = Ec2InstanceMetadata\n\
+role_session_name = cloudcustodian-via-cli\n"  >>~/.aws/config 
 ```
 8.  Test the ability to use the new credentials profile named cc
 ```
