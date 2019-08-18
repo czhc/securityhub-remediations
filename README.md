@@ -22,8 +22,18 @@ However, this workshop is not intended to to provide a complete introduction to 
 or be comfortable setting up a docker environment with aws credentials in the host env.
 6. You need to have GuardDuty enabled on the account for module 2 and 5 to work, if not follow https://docs.aws.amazon.com/guardduty/latest/ug/guardduty_settingup.html#guardduty_enable-gd 
 7. If any of your existing ec2 instances have their tag:Name=RemediationTestTarget then please rename them as instances with this value will be the target for actions during this workshop
-8. Resources will be created in the default vpc.  If you don't have a default vpc, you will need to modify the commands to specify the vpc you want to use.
-9. A git client to download the workshop files.
+8. If you choose to install into an existing, rather than enabling the option to create a new VPC, be aware of the following:
+    1.  VPC needs to have a connectivity to the following service's endpoints, such as thru a IGW or TGW:
+        1.  EC2 - could also be via VPCEndpoints
+        2.  Lambda - could also be via VPCEndpoints
+        3.  SSM (Systems Manager) - could also be via VPCEndpoints
+        4.  SecurityHub - VPC Endpoints not supported AsOf last update to this doc
+        5.  GuardDuty - VPC Endpoints not supported AsOf last update to this doc
+        6.  Cloud9 - Only needed if the cloudformation parameter CreateCloud9Instance is set to True.  
+        7.  Config (only in module 4) - could also be via VPCEndpoints
+        8.  STS (only in module 4) - could also be via VPCEndpoints
+        9.  Cloudwatch Logs and Events - could also be via VPCEndpoints
+    2. If using an S3 VPCEndpoint, access needs to be provided to a [list of public s3 buckets owned by Amazon for use with SSM](https://docs.aws.amazon.com/systems-manager/latest/userguide/setup-instance-profile.html#instance-profile-custom-s3-policy).  
 
 # Modules
 
@@ -145,6 +155,7 @@ docker run -it --rm -v /home/ec2-user/environment/securityhub-remediations/outpu
 aws ec2 associate-iam-instance-profile --iam-instance-profile Name=Cloud9Instance --instance-id $(aws ec2 describe-instances --filters "Name=tag:Name,Values=RemediationTestTarget" --query Reservations[*].Instances[*].[InstanceId] --output text)
 ```
 6.  Future Addition: Similar policy as a config rule
+7.  
 ## Module 5 - Automated Remediations - GuardDuty Event on IAMUser
 1. Run the following command,
 ```
@@ -181,3 +192,12 @@ aws iam list-access-keys --user-name GeneratedFindingUserName
 10. Evaluate the output by looking for "Status"="Inactive"
 
 
+## Module X - Cleanup
+1.  For maximum cleanup:
+    1. delete the cloudformation stack 
+    2. disable SecurityHub, which is really not recommended.
+    3. TODO: Details about CloudCustodian lambda, cloudwatch events and logs
+2.  If you did not choose to execute the delete the cloudformation stack step, you should at least terminate the EC2 instance used as a test target by runnning the following:
+```
+aws ec2 terminate-instances --instance-ids $(aws ec2 describe-instances --filters "Name=tag:Name,Values=RemediationTestTarget" --query Reservations[*].Instances[*].[InstanceId] --output text)
+```
