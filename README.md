@@ -111,7 +111,7 @@ docker run -it --rm --group-add 501 -v /home/ec2-user/environment/securityhub-re
 | -it | [interactive/foreground mode](https://docs.docker.com/engine/reference/run/#foreground) |
 | --rm | [clean up docker container when container exits](https://docs.docker.com/engine/reference/run/#clean-up----rm) |
 | --group-add 501 | configs the container process to execute being a member of unix group 501 so that it's allowed to write to the output directory
-| -v /home/ec2-user/environment/securityhub-remediations/output:/home/custodian/output:rw | [maps a directory](https://docs.docker.com/engine/reference/run/#volume-shared-filesystems) for the output of Cloud Custodian custodian between the container host and the container instance and is read/write enabled |
+| -v /home/ec2-user/environment/securityhub-remediations/output:/home/custodian/output:rw | [maps a directory](https://docs.docker.com/engine/reference/run/#volume-shared-filesystems) for the output of Cloud Custodian between the container host and the container instance. volume is read/write enabled |
 | -v /home/ec2-user/environment/securityhub-remediations:/home/custodian/securityhub-remediations:ro|map the files for the workshop into the container so the cloud custodian policies are available insider the container. volume is mapped in ReadOnly mode |
 | -v /home/ec2-user/.aws:/home/custodian/.aws:ro | maps the [aws cli configuration files](https://docs.aws.amazon.com/cli/latest/userguide/cli-configure-files.html) into the container in read-only mode.  Cloud Custodian uses the same configuration files, as both use the [boto3 Python SDK](https://boto3.amazonaws.com/v1/documentation/api/latest/index.html) |
 | ${SECHUBWORKSHOP_CONTAINER} | evaluates to cloudcustodian/c7n which is the docker container image which is downloaded from https://hub.docker.com/r/cloudcustodian/c7n |
@@ -150,7 +150,7 @@ docker run -it --rm --group-add 501 -v /home/ec2-user/environment/securityhub-re
 ```
 2.  Next run the following command which leverages [Systems Manager's Run Command](https://docs.aws.amazon.com/systems-manager/latest/userguide/execute-remote-commands.html) to run an "nslookup" command on the ec2 instance tag:Name RemediationTestTarget where it's looking up a dns name which [GuardDuty will detect as Command and Control activity](https://docs.aws.amazon.com/guardduty/latest/ug/guardduty_backdoor.html#backdoor7)
 ```
-aws ssm send-command --document-name AWS-RunShellScript --parameters commands=["nslookup guarddutyc2activityb.com"] --targets "Key=tag:Name,Values=RemediationTestTarget" --comment "Force GuardDutyFinding" --cloud-watch-output-config CloudWatchLogGroupName=/aws/ssm/AWS-RunShellScript,CloudWatchOutputEnabled=true
+aws ssm send-command --document-name AWS-RunShellScript --parameters commands=["nslookup guarddutyc2activityb.com"] --targets "Key=tag:Name,Values=RemediationTestTarget" --comment "Force GuardDutyFinding" --cloud-watch-output-config CloudWatchLogGroupName=/aws/ssm/AWS-RunShellScript,CloudWatchOutputEnabled=true --profile cc
 ```
 3.  As it can take a long time (more than 20 minutes often around 2 hours) for GuardDuty to generate a DNS based finding, please proceed to the next module, then come back to the next review step later.
 4.  Review the Logs via https://console.aws.amazon.com/cloudwatch/home?region=us-east-1#logStream:group=/aws/lambda/custodian-ec2-sechub-remediate-severity-with-findings;streamFilter=typeLogStreamPrefix 
@@ -187,21 +187,24 @@ aws guardduty archive-findings \
         $(aws guardduty list-findings \
             --detector-id \
                 $(aws guardduty list-detectors --query DetectorIds --output text) \
-            --finding-criteria '{"Criterion": {"service.archived": {"Eq":["false"]}, \ "resource.accessKeyDetails.userName": {"Eq":["GeneratedFindingUserName"]}}}' \
-            --query 'FindingIds[0]' --output text)
+            --finding-criteria '{"Criterion": {"service.archived": {"Eq":["false"]},"resource.accessKeyDetails.userName": {"Eq":["GeneratedFindingUserName"]}}}' --query 'FindingIds[0]' --output text)
 ```
 4.  Archive any existing findings of this type in Security Hub, to be on the safe side.
 ```
 aws securityhub update-findings --record-state ARCHIVED --filters '{"ResourceAwsIamAccessKeyUserName":[{"Value": "GeneratedFindingUserName","Comparison":"EQUALS"}]}' 
 ```
-5. Run the following command, which creates a sample finding in GuardDuty, which automatically get imported into SecurityHub, which is an finding type ['UnauthorizedAccess:IAMUser/MaliciousIPCaller'](https://docs.aws.amazon.com/guardduty/latest/ug/guardduty_unauthorized.html#unauthorized5) on an IAMUser named GeneratedFindingUserName, which was created by cloudformation script in module 1.
+5.  Run the following command to validate that the Access Keys status is currently active:
 ```
-aws guardduty create-sample-findings --detector-id `aws guardduty list-detectors --profile cc --query DetectorIds --output text` --finding-types 'UnauthorizedAccess:IAMUser/MaliciousIPCaller'
+aws iam list-access-keys --user-name GeneratedFindingUserName
 ```
-6.  First, validate that Guard Duty generated the sample finding by going to the Guard Duty Console and look for the finding type "UnauthorizedAccess:IAMUser/MaliciousIPCaller"
-7.  While it can take a few minutes for the finding to show up in the Security Hub console, look for the finding Title = "API GeneratedFindingAPIName was invoked from a known malicious IP address." or use the following URL to search: https://console.aws.amazon.com/securityhub/home?region=us-east-1#/findings?search=RecordState%3D%255Coperator%255C%253AEQUALS%255C%253AACTIVE%26ResourceAwsIamAccessKeyUserName%3D%255Coperator%255C%253AEQUALS%255C%253AGeneratedFindingUserName
-8.  Look within the CloudWatch Logs, remember the LogGroup pattern of /aws/lambda/custodian-$(name of the cloud custodian policy).  You are looking a lines containing "policy:iam-user-hubfinding-remediate-disable invoking action:userremoveaccesskey resources:1" followed by a line containing "metric:ApiCalls Count:2 policy:iam-user-hubfinding-remediate-disable restype:iam-user", if they don't appear will need to troubleshoot using the logs.
-9.  Validate that the Access Keys were actually removed from the user by running the following command:
+6. Run the following command, which creates a sample finding in GuardDuty, which automatically get imported into SecurityHub, which is an finding type ['UnauthorizedAccess:IAMUser/MaliciousIPCaller'](https://docs.aws.amazon.com/guardduty/latest/ug/guardduty_unauthorized.html#unauthorized5) on an IAMUser named GeneratedFindingUserName, which was created by cloudformation script in module 1.
+```
+aws guardduty create-sample-findings --detector-id `aws guardduty list-detectors --query DetectorIds --output text` --finding-types 'UnauthorizedAccess:IAMUser/MaliciousIPCaller'
+```
+7.  First, validate that Guard Duty generated the sample finding by going to the Guard Duty Console and look for the finding type "UnauthorizedAccess:IAMUser/MaliciousIPCaller"
+8.  While it can take a few minutes for the finding to show up in the Security Hub console, look for the finding Title = "API GeneratedFindingAPIName was invoked from a known malicious IP address." or use the following URL to search: https://console.aws.amazon.com/securityhub/home?region=us-east-1#/findings?search=RecordState%3D%255Coperator%255C%253AEQUALS%255C%253AACTIVE%26ResourceAwsIamAccessKeyUserName%3D%255Coperator%255C%253AEQUALS%255C%253AGeneratedFindingUserName
+9.  Look within the CloudWatch Logs, remember the LogGroup pattern of /aws/lambda/custodian-$(name of the cloud custodian policy).  You are looking a lines containing "policy:iam-user-hubfinding-remediate-disable invoking action:userremoveaccesskey resources:1" followed by a line containing "metric:ApiCalls Count:2 policy:iam-user-hubfinding-remediate-disable restype:iam-user", if they don't appear will need to troubleshoot using the logs.
+10.  Validate that the Access Keys were actually removed from the user by running the following command:
 ```
 aws iam list-access-keys --user-name GeneratedFindingUserName
 ```
