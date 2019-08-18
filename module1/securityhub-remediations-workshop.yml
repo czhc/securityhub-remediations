@@ -45,7 +45,7 @@ Resources:
       InstanceType: !Ref "Cloud9InstanceType"
       Name: SecHubWorkshop
       OwnerArn: 
-        Fn:::If:
+        Fn::If:
         - Cloud9OwnerArnEmpty
         - Ref: AWS::NoValue
         - Ref: Cloud9OwnerArn
