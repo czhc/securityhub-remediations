@@ -113,7 +113,7 @@ docker run -it --rm -v /home/ec2-user/environment/securityhub-remediations/outpu
 | -v /home/ec2-user/environment/securityhub-remediations/output:/home/custodian/output:rw | [maps a directory](https://docs.docker.com/engine/reference/run/#volume-shared-filesystems) for the output of Cloud Custodian custodian between the container host and the container instance and is read/write enabled |
 | -v /home/ec2-user/environment/securityhub-remediations:/home/custodian/securityhub-remediations:ro|map the files for the workshop into the container so the cloud custodian policies are available insider the container. volume is mapped in ReadOnly mode |
 | -v /home/ec2-user/.aws:/home/custodian/.aws:ro | maps the [aws cli configuration files](https://docs.aws.amazon.com/cli/latest/userguide/cli-configure-files.html) into the container in read-only mode.  Cloud Custodian uses the same configuration files, as both use the [boto3 Python SDK](https://boto3.amazonaws.com/v1/documentation/api/latest/index.html) |
-| ${SECHUBWORKSHOP_CONTAINER} | evaluates to cloudcustodian/c7n which is the docker container image which is downloaded from https://hub.docker.com/r/${SECHUBWORKSHOP_CONTAINER} |
+| ${SECHUBWORKSHOP_CONTAINER} | evaluates to cloudcustodian/c7n which is the docker container image which is downloaded from https://hub.docker.com/r/cloudcustodian/c7n |
 | run | instructs Cloud Custodian to run a policy. This is the first part of the command line which is passed to CloudCustodian |
 | --cache-period 0 | disables cloud custodian's caching of api call results |
 | -s /home/custodian/output | specifies where log and resource data is placed | 
