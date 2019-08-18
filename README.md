@@ -15,14 +15,14 @@ Your feedback is highly desired, please [submit a new issue](https://github.com/
 
 # Prerequisites
 
-1. You will need an [AWS account](https://aws.amazon.com/account/) for this workshop and administrative credentials, with console and [aws cli access](https://docs.aws.amazon.com/cli/latest/userguide/cli-configure-files.html). 
-2. We suggest you use a new/clean account, or at least one in which can tolerate the terminatation, stopping, and/or deleting of resources, and doesn't already have automated remediations of security groups or EC2 instances with public access, or removal of IAM users.
-3. You will incur charges for the AWS resources used in this workshop. The charges for some of the resources may be covered through the [AWS Free Tier](https://aws.amazon.com/free/). The demo uses free tier choices wherever possible.
-4. You must run this workshop in a [region supported by AWS Security Hub](https://docs.aws.amazon.com/general/latest/gr/rande.html#sechub_region).  We recommended using the us-east-1 region.
-5. You must run this workshop in a region support by [AWS Cloud9](https://docs.aws.amazon.com/general/latest/gr/rande.html#cloud9_region), 
+1.  You will need an [AWS account](https://aws.amazon.com/account/) for this workshop and administrative credentials, with console and [aws cli access](https://docs.aws.amazon.com/cli/latest/userguide/cli-configure-files.html). 
+2.  We suggest you use a new/clean account, or at least one in which can tolerate the terminatation, stopping, and/or deleting of resources, and doesn't already have automated remediations of security groups or EC2 instances with public access, or removal of IAM users.
+3.  You will incur charges for the AWS resources used in this workshop. The charges for some of the resources may be covered through the [AWS Free Tier](https://aws.amazon.com/free/). The demo uses free tier choices wherever possible.
+4.  You must run this workshop in a [region supported by AWS Security Hub](https://docs.aws.amazon.com/general/latest/gr/rande.html#sechub_region).  We recommended using the us-east-1 region.
+5.  You must run this workshop in a region support by [AWS Cloud9](https://docs.aws.amazon.com/general/latest/gr/rande.html#cloud9_region), 
 or be comfortable setting up a docker environment with aws credentials in the host env.
-7. If any of your existing ec2 instances have their tag:Name=RemediationTestTarget then please rename them as instances with this value will be the target for actions during this workshop
-8. If you choose to install into an existing, rather than enabling the option to create a new VPC, be aware of the following:
+7.  If any of your existing ec2 instances have their tag:Name=RemediationTestTarget then please rename them as instances with this value will be the target for actions during this workshop
+8.  If you choose to install into an existing, rather than enabling the option to create a new VPC, be aware of the following:
     1.  VPC needs to have a connectivity to the following service's endpoints, such as thru a IGW or TGW:
         1.  EC2 - could also be via VPCEndpoints
         2.  Lambda - could also be via VPCEndpoints
