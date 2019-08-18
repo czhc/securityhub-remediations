@@ -164,7 +164,7 @@ Resources:
               - "lambda:TagResource"
               - "lambda:UntagResource"
             Resource: "*"
-           -
+          -
             Sid: "CCSecurityHubActions"
             Effect: "Allow"
             Action:
