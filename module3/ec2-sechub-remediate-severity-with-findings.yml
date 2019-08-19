@@ -10,12 +10,12 @@ policies:
       #- type: event
       #  key: "detail.findings[].ProductFields.aws/securityhub/ProductName"
       #  value: GuardDuty
-      - type: event
-        key: "detail.findings[].Resources[].Type"
-        value: AwsEc2Instance 
+      # - type: event
+      #    key: "detail.findings[].Resources[].Type"
+      #  value: AwsEc2Instance 
       # Filter for medium and high severity events from GuardDuty
       - type: event
-        key: detail.severity
+        key: detail.findings[0].Severity.Normalized
         op: gte
         value: 31
       - type: value
