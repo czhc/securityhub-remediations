@@ -7,9 +7,9 @@ policies:
         packages: [botocore, boto3, urllib3]
         memory: 128
     filters:
-      - type: event
-        key: "detail.findings[].ProductFields.aws/securityhub/ProductName"
-        value: GuardDuty
+      #- type: event
+      #  key: "detail.findings[].ProductFields.aws/securityhub/ProductName"
+      #  value: GuardDuty
       - type: event
         key: "detail.findings[].Resources[].Type"
         value: AwsEc2Instance 
