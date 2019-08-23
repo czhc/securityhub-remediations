@@ -1,11 +1,15 @@
 policies:
   - name: ec2-sechub-remediate-severity-with-findings
+    description: Security Finding imported filtering on Severity >= Medium/31, Name, and a previous report of a Vulnerability
     resource: ec2
     mode:
         type: hub-finding
         role: arn:aws:iam::{account_id}:role/CloudCustodian
         packages: [botocore, boto3, urllib3]
         memory: 128
+        tags:
+          CostCenter: SecurityHubWorkshop
+          CreatedBy: CloudCustodian
     filters:
       #- type: event
       #  key: "detail.findings[].ProductFields.aws/securityhub/ProductName"

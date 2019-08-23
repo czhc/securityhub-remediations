@@ -20,6 +20,12 @@ policies:
         actions:
           - s3:GetObject
           - s3:* 
+      - type: check-permissions
+        match: allowed
+        match-operator: or
+        actions:
+          - kms:Decrypt
+          - kms:* 
     actions:
       - type: post-finding
         severity_normalized: 70

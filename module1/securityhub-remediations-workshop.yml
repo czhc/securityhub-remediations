@@ -113,6 +113,8 @@ Resources:
               - "lambda:GetFunction"
               - "lambda:PutFunctionConcurrency"
               - "lambda:DeleteFunctionConcurrency"
+              - "lambda:TagResource"
+              - "lambda:UntagResource"
             Resource:
               - !Sub 'arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:custodian-*'
           -
