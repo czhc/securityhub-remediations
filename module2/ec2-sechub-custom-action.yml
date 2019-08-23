@@ -7,6 +7,9 @@ policies:
         role: arn:aws:iam::{account_id}:role/CloudCustodian
         packages: [botocore, boto3, urllib3]
         memory: 128
+        tags:
+          CostCenter: SecurityHubWorkshop
+          CreatedBy: CloudCustodian
     actions:
         # Disassociate instance profile by not setting a name, thus any api attempts from instance will get implicit denies
       - type: set-instance-profile

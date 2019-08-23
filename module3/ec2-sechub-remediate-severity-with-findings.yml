@@ -7,6 +7,7 @@ policies:
         role: arn:aws:iam::{account_id}:role/CloudCustodian
         packages: [botocore, boto3, urllib3]
         memory: 128
+        concurrency: 5
         tags:
           CostCenter: SecurityHubWorkshop
           CreatedBy: CloudCustodian
