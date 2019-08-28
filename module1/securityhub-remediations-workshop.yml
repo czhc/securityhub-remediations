@@ -165,8 +165,8 @@ Resources:
               - "tag:UntagResources"
               - "lambda:TagResource"
               - "lambda:UntagResource"
-              - "efs:CreateTags"
-              - "efs:DeleteTags"
+              - "elasticfilesystem:CreateTags"
+              - "elasticfilesystem:DeleteTags"
             Resource: "*"
           -
             Sid: "CCSecurityHubActions"
