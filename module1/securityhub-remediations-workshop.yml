@@ -33,7 +33,7 @@ Parameters:
     Type: 'String'
     Description: "If CreateCloud9Instance = True, then this parameter should be populated with the arn of the AWS Console role/user that will use the Cloud9 Environment.  If not populated, will result it being owned by the user invoking the Cloudformation.  Thus if using Console for creating the stack, then the same console user will be able to use the Cloud9Env.  If invoking from a command line, and the cli user/role is not the same same as the console user, then this parameter must be specified"
     Default: ""
-    AllowedPattern: "arn:aws:(iam|sts)::d+:(root|user|federated-user|assumed-role)/?S*"
+    #AllowedPattern: "arn:aws:(iam|sts)::d+:(root|user|federated-user|assumed-role)/?S*"
 
 Conditions:
   CreateCloud9Instance: !Equals [ !Ref CreateCloud9Instance, True]
