@@ -23,14 +23,17 @@ Parameters:
     Type: 'String'
     Default: 't2.micro'
     Description: 'The type of instance for the Cloud9 environment (for example, t2.micro)'
+    AllowedPattern: "^[a-z][1-9][.][a-z0-9]+$"
   TestTargetInstanceType:
     Type: 'String'
     Default: 't2.micro'
     Description: 'The type of instance for the Remediation Test Target (for example, t2.micro)'
+    AllowedPattern: "^[a-z][1-9][.][a-z0-9]+$"
   Cloud9OwnerArn: 
     Type: 'String'
     Description: "If CreateCloud9Instance = True, then this parameter should be populated with the arn of the AWS Console role/user that will use the Cloud9 Environment.  If not populated, will result it being owned by the user invoking the Cloudformation.  Thus if using Console for creating the stack, then the same console user will be able to use the Cloud9Env.  If invoking from a command line, and the cli user/role is not the same same as the console user, then this parameter must be specified"
     Default: ""
+    AllowedPattern: "arn:aws:(iam|sts)::\d+:(root|user|federated-user|assumed-role)\/?\S*"
 
 Conditions:
   CreateCloud9Instance: !Equals [ !Ref CreateCloud9Instance, True]
@@ -44,6 +47,7 @@ Resources:
       Description: "Security Hub Remediations Workshop"
       InstanceType: !Ref "Cloud9InstanceType"
       Name: SecHubWorkshop
+      AutomaticStopTimeMinutes: 90
       OwnerArn: 
         Fn::If:
         - Cloud9OwnerArnEmpty
