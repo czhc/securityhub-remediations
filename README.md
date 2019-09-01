@@ -46,8 +46,11 @@ or be comfortable setting up a docker environment with aws credentials in the ho
 
 ## Module 1 - Environment Build and Configuration
 
-1.  If you don't already have SecurityHub enabled in the account and region you plan on using, then run "aws securityhub enable-security-hub" 
-2.  You need to have GuardDuty enabled on the account for module 2 and 5 to work, if not yet then either run the following command or follow the [steps to enable on the console]( https://docs.aws.amazon.com/guardduty/latest/ug/guardduty_settingup.html#guardduty_enable-gd)
+1.  If you don't already have SecurityHub enabled in the account and region you plan on using, then run:
+```
+aws securityhub enable-security-hub
+```
+2.  You need to have GuardDuty enabled on the account for module 2 and 5 to work, if not yet then either run the following command or follow the [steps to enable on the console](https://docs.aws.amazon.com/guardduty/latest/ug/guardduty_settingup.html#guardduty_enable-gd)
 ```
 aws guardduty create-detector --enable
 ```
@@ -55,9 +58,10 @@ aws guardduty create-detector --enable
 4.  Use the AWS Console to launch a cloudformation stack using the template downloaded in the previous step. If if you launch from the cli, the role must match your console role otherwise you won't be able to see the Cloud9 Environment IDE.
 5.  Assign an IAM Instance Profile to the ec2 instance for the Cloud9 environment
 ```
-aws ec2 associate-iam-instance-profile --iam-instance-profile Name=SecurityHubRemediationWorkshopCli --instance-id $(aws ec2 describe-instances --filters Name=tag:Name,Values="aws-cloud9-SecHubWorkshop*" Name=instance-state-name,Values=running --query Reservations[*].Instances[*].[InstanceId] --output text)
+aws ec2 associate-iam-instance-profile --iam-instance-profile Name=SecurityHubRemediationWorkshopCli --instance-id $(aws ec2 describe-instances --filters Name=tag:Name,Values="aws-cloud9-SecurityHubWorkshop*" Name=instance-state-name,Values=running --query Reservations[*].Instances[*].[InstanceId] --output text)
 ```
-6.  Find the terminal session at the bottom which starts with "bash" and use it to run the following commands so that you have a copy of the workshop files on your Cloud9 instance and have a directory for output from Cloud Custodian: 
+6.  Verify that the output from the prior command contained "State: associating"
+7.  Find the terminal session at the bottom which starts with "bash".  You will use it for the remainder of the Workshop anytime their is a command line to be run. Use it to run the following commands so that you have a copy of the workshop files on your Cloud9 instance and have a directory for output from Cloud Custodian: 
 ```
 git clone https://github.com/FireballDWF/securityhub-remediations.git
 cd securityhub-remediations

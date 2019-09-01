@@ -19,7 +19,7 @@ policies:
         # stop the instance
       - stop
       
-  - name: DisableAccessKey
+  - name: DisableKey
     description: Disables access keys of the user
     resource: iam-user
     mode:
