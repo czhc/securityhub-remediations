@@ -134,10 +134,12 @@ docker run -it --rm --group-add 501 -v /home/ec2-user/environment/securityhub-re
 ```
 2019-09-01 19:20:29,021: custodian.policy:INFO Provisioning policy lambda DenySnapStop
 2019-09-01 19:20:30,885: custodian.policy:INFO Provisioning policy lambda DisableKey
+2019-09-01 19:20:30,885: custodian.policy:INFO Provisioning policy lambda Delete
 2019-09-01 19:20:32,222: custodian.serverless:INFO Publishing custodian policy lambda function custodian-DenySnapStop
 2019-09-01 19:20:32,222: custodian.serverless:INFO Publishing custodian policy lambda function custodian-DisableKey
+2019-09-01 19:20:32,222: custodian.serverless:INFO Publishing custodian policy lambda function custodian-Delete
 ```
-3. Note that the string after 'Provisioning policy lambda" matches the policy name contained within the ec2-sechub-custom-actions.yml file from the last docker command.  The name of the generated lambda will be composed of that policy name prefixed with "custodian-".  Cloudwatch logs are generated following standard naming convention, /aws/lamabda/custodian-$(PolicyName)
+3. Note that the string after 'Provisioning policy lambda" matches the policy names contained within the ec2-sechub-custom-actions.yml file from the last docker command.  The namse of the generated lambda will be composed of that policy names prefixed with "custodian-".  Cloudwatch logs are generated following standard naming convention, /aws/lamabda/custodian-$(PolicyName)
 3. Open the Security Hub Console and click on Findings, or click https://console.aws.amazon.com/securityhub/home?region=us-east-1#/findings?search=RecordState%3D%255Coperator%255C%253AEQUALS%255C%253AACTIVE 
 4. You should see a row where "Title=ec2-force-vulnerabilities", if not then in the Findings search box, type Title, under the pop-up Filters click on Title, then in the new popup, enter "ec2-force-vulnerabilities" then click Apply
 5. Click the checkbox for the finding (There should only be one at this point, but checkbox the first (most recently updated)
@@ -153,7 +155,6 @@ aws ec2 associate-iam-instance-profile --iam-instance-profile Name=SecurityHubRe
 ```
 aws ec2 start-instances --instance-ids $(aws ec2 describe-instances --filters "Name=tag:Name,Values=RemediationTestTarget" --query Reservations[*].Instances[*].[InstanceId] --output text)
 ```
-
 ## Module 3 - Automated Remediations - GuardDuty DNS Event on EC2 Instance
 1.  Run the following command which runs a policy named [ec2-sechub-remediate-severity-with-findings](https://github.com/FireballDWF/securityhub-remediations/blob/master/module3/ec2-sechub-remediate-severity-with-findings.yml) which instructs Cloud Custodian to dynamically generate and deploy a lambda, which will be invoked when [SecurityHub generates a Cloudwatch Event](https://docs.aws.amazon.com/securityhub/latest/userguide/securityhub-cloudwatch-events.html) when sent a finding. In this module, the finding will be triggered when GuardDuty generates a finding, and the severity of the is greater than or equal to 31, and the EC2 instance has any vulnerability previously reported to SecurityHub
 ```
@@ -220,7 +221,10 @@ aws guardduty create-sample-findings --detector-id `aws guardduty list-detectors
 aws iam list-access-keys --user-name GeneratedFindingUserName
 ```
 10. Evaluate the output by looking for "Status"="Inactive"
-
+11. Optional Steps: One of the other Custom Actions which got deployed to Security Hub is named "Iam-User DisableKey". If you would like to test it, run the following command to reactivate the AccessKey, then repeat the step (earlier in this module) for generating a sample finding with GuardDuty, wait for the finding event to be generated and show up in SecurityHub, then view the finding in SecurityHub, check the box for the finding, then select the custom action named "Iam-User DisableKey", then repeat the "list-access-key" step to confirm the inactive status of the keys.
+```
+aws iam update-access-key --user-name GeneratedFindingUserName --status Active --access-key-id $(aws iam list-access-keys --user-name GeneratedFindingUserName --query AccessKeyMetadata[0].AccessKeyId --output text) --profile cc
+``` 
 
 ## Module X - Cleanup
 1.  For maximum cleanup:
