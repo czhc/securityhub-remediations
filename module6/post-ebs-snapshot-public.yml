@@ -1,0 +1,24 @@
+policies:
+  - name: post-ebs-snapshot-public
+    resource: ebs-snapshot
+    mode:
+      type: periodic
+      schedule: "rate(5 minutes)"
+      role: arn:aws:iam::{account_id}:role/CloudCustodian
+      packages: [botocore, boto3, urllib3]
+      memory: 128
+      tags:
+        CostCenter: SecurityHubWorkshop
+        CreatedBy: CloudCustodian
+    filters:
+      - type: cross-account
+        whitelist_orgids:
+          - "o-ypoj932199"
+    actions:
+    - type: post-finding
+      severity_normalized: 70
+      types:
+        - "Software and Configuration Checks/AWS Security Best Practices"
+      recommendation: "Delete Snapshot or at least remove public access or any access outside your org"
+      confidence: 100
+      compliance_status: FAILED
