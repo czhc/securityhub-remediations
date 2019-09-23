@@ -185,7 +185,7 @@ aws ec2 associate-iam-instance-profile --iam-instance-profile Name=SecurityHubRe
 6.  Future Addition: Similar policy as a config rule
   
 ## Module 5 - Automated Remediations - GuardDuty Event on IAMUser
-1. Run the following command,
+1. Run the following command:
 ```
 docker run -it --rm --group-add 501 -v /home/ec2-user/environment/securityhub-remediations/output:/home/custodian/output:rw -v /home/ec2-user/environment/securityhub-remediations:/home/custodian/securityhub-remediations:ro -v /home/ec2-user/.aws:/home/custodian/.aws:ro ${SECHUBWORKSHOP_CONTAINER} run --cache-period 0 -s /home/custodian/output --profile cc -c /home/custodian/securityhub-remediations/module5/iam-user-hubfinding-remediate-disable.yml
 ```
@@ -225,6 +225,19 @@ aws iam list-access-keys --user-name GeneratedFindingUserName
 ```
 aws iam update-access-key --user-name GeneratedFindingUserName --status Active --access-key-id $(aws iam list-access-keys --user-name GeneratedFindingUserName --query AccessKeyMetadata[0].AccessKeyId --output text) --profile cc
 ``` 
+
+## Module 6 - Optional - Remediate an Public EBS-Snapshot 
+
+1. There Be Dragons: This module requires an EBS-Snapshot which has been shared with the public.  If you create one, and if you account is monitored by your organization which looks for such an issue, then depending on timing, a ticket may get generated, assigned to you with notification to one or more people in your management chain and/or security team.
+2. Run the following command:
+```
+docker run -it --rm --group-add 501 -v /home/ec2-user/environment/securityhub-remediations/output:/home/custodian/output:rw -v /home/ec2-user/environment/securityhub-remediations:/home/custodian/securityhub-remediations:ro -v /home/ec2-user/.aws:/home/custodian/.aws:ro ${SECHUBWORKSHOP_CONTAINER} run --cache-period 0 -s /home/custodian/output --profile cc -c /home/custodian/securityhub-remediations/module6/post-ebs-snapshot-public.yml
+
+2. Create an new 1GB empty EBS volume, and don't store anything in it or even attach it anywhere.
+3. Create a snapshot of the volume
+4. Set the snapshots's permisisions to be public.
+5. 
+
 
 ## Module X - Cleanup
 1.  For maximum cleanup:

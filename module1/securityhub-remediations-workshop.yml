@@ -175,6 +175,7 @@ Resources:
               - "ec2:TerminateInstances"
               - "config:PutEvaluations"
               - "s3:PutBucketTagging"
+              - "s3:PutBucketPolicy"
               - "tag:TagResources"
               - "tag:UntagResources"
               - "lambda:TagResource"

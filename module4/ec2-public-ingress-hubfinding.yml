@@ -32,6 +32,9 @@ policies:
         match-operator: or
         actions:
           - s3:GetObject
+          - s3:GetObjectVersion
+          - s3:PutBucketWebsite
+          - s3:PutReplicationConfiguration
           - s3:*
       # is member of ASG due to the asg action, should have a non-asg version of the policy as well
       #- "tag:aws:autoscaling:groupName": not-null
