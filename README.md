@@ -34,6 +34,7 @@ or be comfortable setting up a docker environment with aws credentials in the ho
         8.  STS (only in module 4) - could also be via VPCEndpoints
         9.  Cloudwatch Logs and Events - could also be via VPCEndpoints
     2. If using an S3 VPCEndpoint, access needs to be provided to a [list of public s3 buckets owned by Amazon for use with SSM](https://docs.aws.amazon.com/systems-manager/latest/userguide/setup-instance-profile.html#instance-profile-custom-s3-policy).  
+8. Cloudtrail need to be enabled in the region 
 
 # Modules
 
