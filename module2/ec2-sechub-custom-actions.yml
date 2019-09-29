@@ -5,7 +5,6 @@ policies:
     mode:
         type: hub-action
         role: arn:aws:iam::{account_id}:role/CloudCustodian
-        packages: [botocore, boto3, urllib3]
         memory: 128
         tags:
           CostCenter: SecurityHubWorkshop
@@ -25,7 +24,6 @@ policies:
     mode:
         type: hub-action
         role: arn:aws:iam::{account_id}:role/CloudCustodian
-        packages: [botocore, boto3, urllib3]
         memory: 128
         tags:
           CostCenter: SecurityHubWorkshop
@@ -40,7 +38,6 @@ policies:
     mode:
         type: hub-action
         role: arn:aws:iam::{account_id}:role/CloudCustodian
-        packages: [botocore, boto3, urllib3]
         memory: 128
         tags:
           CostCenter: SecurityHubWorkshop
@@ -54,7 +51,6 @@ policies:
     mode:
         type: hub-action
         role: arn:aws:iam::{account_id}:role/CloudCustodian
-        packages: [botocore, boto3, urllib3]
         memory: 128
         tags:
           CostCenter: SecurityHubWorkshop
@@ -62,4 +58,22 @@ policies:
     actions: 
       - type: post-item
         priority: 3
+
+  - name: RemPA
+    description: Remove Public Ingress (IPV4 only) form Ingress Security Groups 
+    resource: security-group
+    mode:
+        type: hub-action
+        role: arn:aws:iam::{account_id}:role/CloudCustodian
+        memory: 128
+        tags:
+          CostCenter: SecurityHubWorkshop
+          CreatedBy: CloudCustodian
+    filters:
+      - type: ingress
+        Cidr:
+          value: "0.0.0.0/0"
+    actions: 
+      - type: remove-permissions
+        ingress: matched
           
