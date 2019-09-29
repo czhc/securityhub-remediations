@@ -131,14 +131,16 @@ docker run -it --rm --group-add 501 -v /home/ec2-user/environment/securityhub-re
 ```
 docker run -it --rm --group-add 501 -v /home/ec2-user/environment/securityhub-remediations/output:/home/custodian/output:rw -v /home/ec2-user/environment/securityhub-remediations:/home/custodian/securityhub-remediations:ro -v /home/ec2-user/.aws:/home/custodian/.aws:ro ${SECHUBWORKSHOP_CONTAINER} run --cache-period 0 -s /home/custodian/output --profile cc -c /home/custodian/securityhub-remediations/module2/ec2-sechub-custom-actions.yml
 ```
-2. You should see a 4 lines of output line like the following:
+2. You should see lines of output line like the following:
 ```
 2019-09-01 19:20:29,021: custodian.policy:INFO Provisioning policy lambda DenySnapStop
 2019-09-01 19:20:30,885: custodian.policy:INFO Provisioning policy lambda DisableKey
 2019-09-01 19:20:30,885: custodian.policy:INFO Provisioning policy lambda Delete
+2019-09-01 19:20:30,885: custodian.policy:INFO Provisioning policy lambda PostOpsItem
 2019-09-01 19:20:32,222: custodian.serverless:INFO Publishing custodian policy lambda function custodian-DenySnapStop
 2019-09-01 19:20:32,222: custodian.serverless:INFO Publishing custodian policy lambda function custodian-DisableKey
 2019-09-01 19:20:32,222: custodian.serverless:INFO Publishing custodian policy lambda function custodian-Delete
+2019-09-01 19:20:32,222: custodian.serverless:INFO Publishing custodian policy lambda function custodian-PostOpsItem
 ```
 3. Note that the string after 'Provisioning policy lambda" matches the policy names contained within the ec2-sechub-custom-actions.yml file from the last docker command.  The namse of the generated lambda will be composed of that policy names prefixed with "custodian-".  Cloudwatch logs are generated following standard naming convention, /aws/lamabda/custodian-$(PolicyName)
 3. Open the Security Hub Console and click on Findings, or click https://console.aws.amazon.com/securityhub/home?region=us-east-1#/findings?search=RecordState%3D%255Coperator%255C%253AEQUALS%255C%253AACTIVE 
