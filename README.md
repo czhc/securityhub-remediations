@@ -16,7 +16,7 @@ Your feedback is highly desired, please [submit a new issue](https://github.com/
 # Prerequisites
 
 1.  You will need an [AWS account](https://aws.amazon.com/account/) for this workshop and administrative credentials, with console and [aws cli access](https://docs.aws.amazon.com/cli/latest/userguide/cli-configure-files.html). 
-2.  We suggest you use a new/clean account, or at least one in which can tolerate the terminatation, stopping, and/or deleting of resources, and doesn't already have automated remediations of security groups or EC2 instances with public access, or removal of IAM users.
+2.  We suggest you use a new/clean account, or at least one in which can tolerate the termination, stopping, and/or deleting of resources, and doesn't already have automated remediations of security groups or EC2 instances with public access, or removal of IAM users.
 3.  You will incur charges for the AWS resources used in this workshop. The charges for some of the resources may be covered through the [AWS Free Tier](https://aws.amazon.com/free/). The demo uses free tier choices wherever possible.
 4.  You must run this workshop in a [region supported by AWS Security Hub](https://docs.aws.amazon.com/general/latest/gr/rande.html#sechub_region).  We recommended using the us-east-1 region.
 5.  You must run this workshop in a region support by [AWS Cloud9](https://docs.aws.amazon.com/general/latest/gr/rande.html#cloud9_region), 
@@ -34,7 +34,8 @@ or be comfortable setting up a docker environment with aws credentials in the ho
         8.  STS (only in module 4) - could also be via VPCEndpoints
         9.  Cloudwatch Logs and Events - could also be via VPCEndpoints
     2. If using an S3 VPCEndpoint, access needs to be provided to a [list of public s3 buckets owned by Amazon for use with SSM](https://docs.aws.amazon.com/systems-manager/latest/userguide/setup-instance-profile.html#instance-profile-custom-s3-policy).  
-8. Cloudtrail need to be enabled in the region 
+8. Cloudtrail need to be enabled in the region
+9. An understanding of [Cloudwatch Events](https://docs.aws.amazon.com/AmazonCloudWatch/latest/events/WhatIsCloudWatchEvents.html) is useful, but not required, for this Workshop
 
 # Modules
 
