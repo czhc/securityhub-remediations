@@ -6,8 +6,13 @@ Parameters:
     Default: '/aws/service/ami-amazon-linux-latest/amzn2-ami-hvm-x86_64-gp2'
     Description: 'See https://aws.amazon.com/blogs/compute/query-for-the-latest-amazon-linux-ami-ids-using-aws-systems-manager-parameter-store/'
   VpcId:
-    Type: 'AWS::EC2::VPC::Id'
+    Type: 'String'
     Description: 'VpcId of where to create resources required for the Workshop'
+    Default: 'CreateNew'
+  VpcCidrBlock:
+    Type: 'String'
+    Description: 'Cidr block only needed if VpcId=CreateNew'
+    Default: '172.31.250.0/24'
   CostCenter:
     Type: 'String'
     Default: 'SecurityHubWorkshop'
@@ -16,9 +21,9 @@ Parameters:
     Type: 'String'
     Description: 'Boolean value if a Cloud9 instance should be created.  Optional, not required'
     AllowedValues:
-      - False
-      - True
-    Default: True
+      - "False"
+      - "True"
+    Default: "True"
   Cloud9InstanceType:
     Type: 'String'
     Default: 't2.micro'
@@ -35,33 +40,122 @@ Parameters:
     AllowedPattern: "^[a-z][1-9][.][a-z0-9]+$"
   Cloud9OwnerArn: 
     Type: 'String'
-    Description: "If CreateCloud9Instance = True, then this parameter should be populated with the arn of the AWS Console role/user that will use the Cloud9 Environment.  If not populated, will result it being owned by the user invoking the Cloudformation.  Thus if using Console for creating the stack, then the same console user will be able to use the Cloud9Env.  If invoking from a command line, and the cli user/role is not the same same as the console user, then this parameter must be specified"
+    Description: "If CreateCloud9Instance = True, then this parameter should be populated with the arn of the AWS Console role/user that will use the Cloud9 Environment.  If not populated, will result it being owned by a role named 'TeamRole' which will fail if the role doesn't exist.  Thus if using Console for creating the stack, then the same console user will be able to use the Cloud9Env.  If invoking from a command line, and the cli user/role is not the same same as the console user, then this parameter must be specified"
     Default: ""
     #AllowedPattern: "arn:aws:(iam|sts)::d+:(root|user|federated-user|assumed-role)/?S*"
   Cloud9AutomaticStopTime: 
     Type: 'Number'
     Description: "Configures the idle timeout of the Cloud9 instance resulting in it being stopped"
     Default: 60
+  EnableGuardDuty:
+    Type: 'String'
+    Description: "Enable Guard Duty, set to false if already enabled in account"
+    Default: "True"
+    AllowedValues:
+      - "False"
+      - "True"
+  EnableSecurityHub:
+    Type: 'String'
+    Description: "Enable Security Hub, set to false if already enabled in account"
+    Default: "True"
+    AllowedValues:
+      - "False"
+      - "True" 
 
 Conditions:
-  CreateCloud9Instance: !Equals [ !Ref CreateCloud9Instance, True]
+  CreateCloud9Instance: !Equals [ !Ref CreateCloud9Instance, "True"]
   Cloud9OwnerArnEmpty: !Equals [ !Ref Cloud9OwnerArn, ""]
+  CreateVPC: !Equals [!Ref VpcId, "CreateNew"]
+  EnableGuardDuty: !Equals [!Ref EnableGuardDuty, "True"]
+  EnableSecurityHub: !Equals [!Ref EnableSecurityHub, "True"]
   
 Resources:
+  WorkshopVpc:
+    Condition: CreateVPC
+    Type: AWS::EC2::VPC
+    Properties: 
+      CidrBlock: !Ref "VpcCidrBlock"
+      EnableDnsHostnames: True
+      EnableDnsSupport: True
+      Tags: 
+        - Key: "Name"
+          Value: "WorkshopVpc"
+        - Key: "CostCenter"
+          Value: !Ref "CostCenter"
+          
+  WorkshopIGW:
+    Condition: CreateVPC
+    Type: AWS::EC2::InternetGateway
+    Properties: 
+      Tags: 
+        - Key: "Name"
+          Value: "WorkshopIGW"
+        - Key: "CostCenter"
+          Value: !Ref "CostCenter"
+          
+  IGWAttachment:
+    Condition: CreateVPC  
+    Type: AWS::EC2::VPCGatewayAttachment
+    Properties: 
+      InternetGatewayId: !Ref "WorkshopIGW"
+      VpcId: !Ref "WorkshopVpc"
+
+  WorkshopSubnet:
+    Condition: CreateVPC
+    Type: AWS::EC2::Subnet
+    Properties: 
+      CidrBlock: !Ref "VpcCidrBlock"
+      MapPublicIpOnLaunch: True
+      Tags: 
+        - Key: "Name"
+          Value: "WorkshopSubnet"
+        - Key: "CostCenter"
+          Value: !Ref "CostCenter"
+      VpcId: !Ref "WorkshopVpc"
+      
+
+  PublicRouteTable:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId: !Ref "WorkshopVpc"
+      Tags:
+        - Key: Name
+          Value: "Workshop Public Routes"
+        - Key: "CostCenter"
+          Value: !Ref "CostCenter"
+
+  DefaultPublicRoute:
+    Type: AWS::EC2::Route
+    DependsOn:  IGWAttachment
+    Properties:
+      RouteTableId: !Ref PublicRouteTable
+      DestinationCidrBlock: 0.0.0.0/0
+      GatewayId: !Ref WorkshopIGW
+
+  PublicSubnet1RouteTableAssociation:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      RouteTableId: !Ref PublicRouteTable
+      SubnetId: !Ref WorkshopSubnet      
+
   SecHubWorkshopEnv:
     Condition: CreateCloud9Instance
     Type: AWS::Cloud9::EnvironmentEC2
     Properties: 
       Description: "Security Hub Remediations Workshop"
       InstanceType: !Ref "Cloud9InstanceType"
-      Name: !Ref "Cloud9EnvName"
       AutomaticStopTimeMinutes: !Ref "Cloud9AutomaticStopTime"
       OwnerArn: 
         Fn::If:
         - Cloud9OwnerArnEmpty
-        - Ref: AWS::NoValue
+        - !Sub 'arn:aws:sts::${AWS::AccountId}:assumed-role/TeamRole/MasterKey'
         - Ref: Cloud9OwnerArn
-      # SubnetId:
+      SubnetId:
+        Fn::If:
+        - CreateVPC
+        - !Ref "WorkshopSubnet"
+        - Ref: AWS::NoValue
+
 
   TestTargetHighRiskPolicy:
     Type: AWS::IAM::ManagedPolicy
@@ -94,7 +188,7 @@ Resources:
               - "ec2:Describe*"
               - "guardduty:CreateSampleFindings"
               - "guardduty:ArchiveFindings"
-              - "ssm:SendCommand",
+              - "ssm:SendCommand"
               - "lambda:ListFunctions"
             Resource: "*"
 
@@ -222,7 +316,10 @@ Resources:
         - "arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore"
         - "arn:aws:iam::aws:policy/CloudWatchAgentServerPolicy"
         - Ref: "TestTargetHighRiskPolicy"
-  
+      Tags: 
+        - Key: "CostCenter"
+          Value: !Ref "CostCenter"
+
   CliInstance:            
     Type: AWS::IAM::Role
     Properties:
@@ -242,7 +339,10 @@ Resources:
         - "arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore"
         - "arn:aws:iam::aws:policy/CloudWatchAgentServerPolicy"
         - Ref: "CliHostPolicy"
-        
+      Tags: 
+        - Key: "CostCenter"
+          Value: !Ref "CostCenter"    
+          
   CliInstanceProfile:
     Type: "AWS::IAM::InstanceProfile"
     Properties:
@@ -279,6 +379,9 @@ Resources:
         - "arn:aws:iam::aws:policy/SecurityAudit"
         - "arn:aws:iam::aws:policy/CloudWatchAgentServerPolicy"
         - Ref: "CloudCustodianPolicyActions"
+      Tags: 
+        - Key: "CostCenter"
+          Value: !Ref "CostCenter"        
 
   CloudCustodianCli: 
     Type: AWS::IAM::Role
@@ -300,17 +403,18 @@ Resources:
         - "arn:aws:iam::aws:policy/CloudWatchAgentServerPolicy"
         - Ref: "CloudCustodianLambdaDeploymentManagedPolicy"
         - Ref: "CloudCustodianPolicyActions"
+      Tags: 
+        - Key: "CostCenter"
+          Value: !Ref "CostCenter"      
 
   RemediationTargetSG:
     Type: AWS::EC2::SecurityGroup
     Properties: 
       GroupDescription: "SecurityHub Remediation Test Target" 
-      GroupName: "SecurityHubRemediationsTestTarget"
-      VpcId: !Ref "VpcId"
+      VpcId: !Ref WorkshopVpc
       Tags: 
-        - 
-          Key: "Name"
-          Value: "SecurityHubRemediationsTestTarget"
+        - Key: "Name"
+          Value: "SG-SecurityHubRemediationsTestTarget"
         - Key: "CostCenter"
           Value: !Ref "CostCenter"
       SecurityGroupIngress:
@@ -320,27 +424,27 @@ Resources:
           ToPort: 443
           IpProtocol: udp
           
-  RemediationTestTarget:
-    Type: AWS::EC2::Instance
-    Properties:
-      ImageId: !Ref "LatestAmiId" 
-      InstanceType: !Ref "TestTargetInstanceType"
-      Tags:
-        - Key: "Name"
-          Value: "RemediationTestTarget"
-        - Key: "CostCenter"
-          Value: !Ref "CostCenter"  
-      SecurityGroupIds:
-        - Ref: "RemediationTargetSG"
-      IamInstanceProfile: !Ref "TestTargetInstanceProfile"
-  
+
   GeneratedFindingUser:    
     Type: AWS::IAM::User
     Properties: 
       UserName: GeneratedFindingUserName
-      
+
   GeneratedFindingUserAccessKey: 
     DependsOn: GeneratedFindingUser
     Type: AWS::IAM::AccessKey
     Properties: 
       UserName: GeneratedFindingUserName
+      
+  GuardDutyDetector: 
+    Condition: EnableGuardDuty
+    Type: AWS::GuardDuty::Detector
+    Properties: 
+      Enable: True
+   
+  SecurityHub: 
+    Condition: EnableGuardDuty
+    Type: AWS::SecurityHub::Hub
+    Properties:
+      Tags:
+          CostCenter: !Ref "CostCenter"  
