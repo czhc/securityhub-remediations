@@ -14,28 +14,9 @@ Your feedback is highly desired, please [submit a new issue](https://github.com/
 * CAF Components: Detective, Responsive
 
 # Prerequisites
-
-1.  You will need an [AWS account](https://aws.amazon.com/account/) for this workshop and administrative credentials, with console and [aws cli access](https://docs.aws.amazon.com/cli/latest/userguide/cli-configure-files.html). 
-2.  We suggest you use a new/clean account, or at least one in which can tolerate the termination, stopping, and/or deleting of resources, and doesn't already have automated remediations of security groups or EC2 instances with public access, or removal of IAM users.
-3.  You will incur charges for the AWS resources used in this workshop. The charges for some of the resources may be covered through the [AWS Free Tier](https://aws.amazon.com/free/). The demo uses free tier choices wherever possible.
-4.  You must run this workshop in a [region supported by AWS Security Hub](https://docs.aws.amazon.com/general/latest/gr/rande.html#sechub_region).  We recommended using the us-east-1 region.
-5.  You must run this workshop in a region support by [AWS Cloud9](https://docs.aws.amazon.com/general/latest/gr/rande.html#cloud9_region), 
-or be comfortable setting up a docker environment with aws credentials in the host env.
-6.  If any of your existing ec2 instances have their tag:Name=RemediationTestTarget then please rename them as instances with this value will be the target for actions during this workshop
-7.  If you choose to install into an existing, rather than enabling the option to create a new VPC, be aware of the following:
-    1.  VPC needs to have a connectivity to the following service's endpoints, such as thru a IGW or TGW:
-        1.  EC2 - could also be via VPCEndpoints
-        2.  Lambda - could also be via VPCEndpoints
-        3.  SSM (Systems Manager) - could also be via VPCEndpoints
-        4.  SecurityHub - VPC Endpoints not supported AsOf last update to this doc
-        5.  GuardDuty - VPC Endpoints not supported AsOf last update to this doc
-        6.  Cloud9 - Only needed if the cloudformation parameter CreateCloud9Instance is set to True.  
-        7.  Config (only in module 4) - could also be via VPCEndpoints
-        8.  STS (only in module 4) - could also be via VPCEndpoints
-        9.  Cloudwatch Logs and Events - could also be via VPCEndpoints
-    2. If using an S3 VPCEndpoint, access needs to be provided to a [list of public s3 buckets owned by Amazon for use with SSM](https://docs.aws.amazon.com/systems-manager/latest/userguide/setup-instance-profile.html#instance-profile-custom-s3-policy).  
-8. Cloudtrail need to be enabled in the region
-9. An understanding of [Cloudwatch Events](https://docs.aws.amazon.com/AmazonCloudWatch/latest/events/WhatIsCloudWatchEvents.html) is useful, but not required, for this Workshop
+1. Ability to navigate within the AWS Management Console to open specific Service consoles and features, including CloudWatch Logs and Lambda.
+2. If you don't already have an understanding of [Cloudwatch Events](https://docs.aws.amazon.com/AmazonCloudWatch/latest/events/WhatIsCloudWatchEvents.html) please follow the link and read the content so you understand this fundamental technology.
+3. If you don't already have an understanding of how Security Hub integrates with Cloudwatch Events, then suggested reading is [Automating AWS Security Hub with CloudWatch Events](https://docs.aws.amazon.com/en_pv/securityhub/latest/userguide/securityhub-cloudwatch-events.html#securityhub-cwe-configure). However it's not required as this workshop will walk you thru one specific method for how to deploy automated remediations with Security Hub.
 
 # Modules
 
@@ -48,61 +29,32 @@ or be comfortable setting up a docker environment with aws credentials in the ho
 
 ## Module 1 - Environment Build and Configuration
 
-1.  If you don't already have SecurityHub enabled in the account and region you plan on using, then run:
+Note: GuardDuty and SecurityHub have already been enabled in the account used for this workshop.
+1.  First, from your Event Engine Team Role tab, click "Open Console" button within the Login Link section.
+2.  Next open the Cloud9 IDE which provides the ability to review files and execute commands in a browser based terminal window.  One quick way is to type "Cloud9" then hit Enter in the "Find Services" textbox near the top of the Management Console.
+3.  Now click the "Open IDE" button.
+4.  In the bottom part of the browser tab which opens up, look for a tab with a label starting with "bash", where the window contents are "TeamRole:~/environment $".  This is the browser based terminal session you'll use for the rest of the workshop for any command line steps.  
+5.  The next step is to get a copy of the files required for this workshop by cloning the workshop's github repo specifing the eventengine branch.
 ```
-aws securityhub enable-security-hub
+git clone --single-branch --branch eventengineenablement https://github.com/FireballDWF/securityhub-remediations.git
 ```
-2.  You need to have GuardDuty enabled on the account for module 2 and 5 to work, if not yet then either run the following command or follow the [steps to enable on the console](https://docs.aws.amazon.com/guardduty/latest/ug/guardduty_settingup.html#guardduty_enable-gd)
+6. Next step is to change into the directory created by the clone operation and then create a directory for the outpot of some commands to be written to.
 ```
-aws guardduty create-detector --enable
-```
-3.  Run "wget https://github.com/FireballDWF/securityhub-remediations/blob/master/module1/securityhub-remediations-workshop.yml" which downloads a copy of the cloudformation template used in the next step.  Alternatively if you don't have a wget, you could use curl or your browser to download the same url.
-4.  Use the AWS Console to launch a cloudformation stack using the template downloaded in the previous step. If if you launch from the cli, the role must match your console role otherwise you won't be able to see the Cloud9 Environment IDE.
-5.  Assign an IAM Instance Profile to the ec2 instance for the Cloud9 environment
-```
-aws ec2 associate-iam-instance-profile --iam-instance-profile Name=SecurityHubRemediationWorkshopCli --instance-id $(aws ec2 describe-instances --filters Name=tag:Name,Values="aws-cloud9-SecurityHubWorkshop*" Name=instance-state-name,Values=running --query Reservations[*].Instances[*].[InstanceId] --output text)
-```
-6.  Verify that the output from the prior command contained "State: associating"
-7.  Find the terminal session at the bottom which starts with "bash".  You will use it for the remainder of the Workshop anytime their is a command line to be run. Use it to run the following commands so that you have a copy of the workshop files on your Cloud9 instance and have a directory for output from Cloud Custodian: 
-```
-git clone https://github.com/FireballDWF/securityhub-remediations.git
 cd securityhub-remediations
 mkdir output
+
 ```
-7.  Run the following in the same Cloud9 terminal to setup an environment varible required by upcoming commands:
-```
-export AWS_ACCOUNT_ID=$(aws sts get-caller-identity --query Account --output text)
-```
-8.  The following environment variable sets the default region to use, change it from us-east-1 if desired, then run it:
-```
-export AWS_DEFAULT_REGION=us-east-1
-```
-9.  Configure credentials for deploying cloud custodian by running the following, and change the region if not targeting us-east-1:
-```
-echo -e "[profile cc]\n\
-region = ${AWS_DEFAULT_REGION}\n\
-role_arn = arn:aws:iam::${AWS_ACCOUNT_ID}:role/CloudCustodianCli\n\
-credential_source = Ec2InstanceMetadata\n\
-role_session_name = cloudcustodian-via-cli\n"  >>~/.aws/config 
-```
-10.  Test the ability to use the new credentials profile named cc
-```
-aws s3 ls --profile cc
-```
-11.  If you get AccessDenied, then troubleshoot the cli credentials issue as they are required by rest of the modules.  If you get "Invalid endpoint: https://s3..amazonaws.com" then you missed the step setting AWS_DEFAULT_REGION.  If you get "An error occurred (InvalidClientTokenId) when calling the AssumeRole operation: The security token included in the request is invalid." then you likely did not perform the step to run the command which starts with "aws ec2 associate-iam-instance-profile"
-12.  Install Cloud Custodian
-    1. To install Cloud Custodian, just run the following in the bash terminal window of Cloud9:
+12.  Next step is to pull down the latest version of the Cloud Custodian docker container image.
 ```
 export SECHUBWORKSHOP_CONTAINER=cloudcustodian/c7n
 docker pull ${SECHUBWORKSHOP_CONTAINER} 
 ```
-13.  Test first Cloud Custodian Policy, which reports that the ec2 instance created in the cloudformation has a vulnerability
-    1. Run the following:
+13.  This step tests the environment by invoking a Cloud Custodian Policy which reports that an ec2 instance has a vulnerability.
 ```
-docker run -it --rm --group-add 501 -v /home/ec2-user/environment/securityhub-remediations/output:/home/custodian/output:rw -v /home/ec2-user/environment/securityhub-remediations:/home/custodian/securityhub-remediations:ro -v /home/ec2-user/.aws:/home/custodian/.aws:ro ${SECHUBWORKSHOP_CONTAINER} run --cache-period 0 -s /home/custodian/output --profile cc -c /home/custodian/securityhub-remediations/module1/force-vulnerability-finding.yml  
+docker run -it --rm --group-add 501 -v /home/ec2-user/environment/securityhub-remediations/output:/home/custodian/output:rw -v /home/ec2-user/environment/securityhub-remediations:/home/custodian/securityhub-remediations:ro -v /home/ec2-user/.aws:/home/custodian/.aws:ro ${SECHUBWORKSHOP_CONTAINER} run --cache-period 0 -s /home/custodian/output -c /home/custodian/securityhub-remediations/module1/force-vulnerability-finding.yml  
 ```
 
-    You should expect to see 2 output lines, one containing "count:1" and another containing "resources:1", similar to the following output.  If you get an error on "batch-import-findings" then it means you have not enabled SecurityHub in the account and region.
+You should expect to see 2 output lines, one containing "count:1" and another containing "resources:1", similar to the following output.  If you get an error on "batch-import-findings" then it means SecurityHub has not been enabled.  Example output is from us-east-1, however your results should indicate the region being used for the workshop event.
 
 ```
 2019-08-11 16:33:57,326: custodian.policy:INFO policy:ec2-force-vulnerabilities resource:ec2 region:us-east-1 count:1 time:0.00
@@ -124,13 +76,16 @@ docker run -it --rm --group-add 501 -v /home/ec2-user/environment/securityhub-re
 | run | instructs Cloud Custodian to run a policy. This is the first part of the command line which is passed to CloudCustodian |
 | --cache-period 0 | disables cloud custodian's caching of api call results |
 | -s /home/custodian/output | specifies where log and resource data is placed | 
-| --profile cc | specifies which AWS credentials profile to use | 
 | -c /home/custodian/securityhub-remediations/module1/force-vulnerability-finding.yml | specifies the actual policy to run | 
+14.  If you received the expected output lines, congratulations, you have successfully tested the environment setup by having Cloud Custodian submit a finding to Security Hub.  Proceed to the next module.
 
 ## Module 2 - Security Hub Custom Actions - Human initiated automation
+Custom Actions in Security Hub are useful for analysts working with the Security Hub console who want to send a specific finding, or a small set of findings, to a response or remediation workflow.
+The finding generated by the test in the first module will be used within this module to explore Custom Actions.  
+
 1. Run the following:
 ```
-docker run -it --rm --group-add 501 -v /home/ec2-user/environment/securityhub-remediations/output:/home/custodian/output:rw -v /home/ec2-user/environment/securityhub-remediations:/home/custodian/securityhub-remediations:ro -v /home/ec2-user/.aws:/home/custodian/.aws:ro ${SECHUBWORKSHOP_CONTAINER} run --cache-period 0 -s /home/custodian/output --profile cc -c /home/custodian/securityhub-remediations/module2/ec2-sechub-custom-actions.yml
+docker run -it --rm --group-add 501 -v /home/ec2-user/environment/securityhub-remediations/output:/home/custodian/output:rw -v /home/ec2-user/environment/securityhub-remediations:/home/custodian/securityhub-remediations:ro -v /home/ec2-user/.aws:/home/custodian/.aws:ro ${SECHUBWORKSHOP_CONTAINER} run --cache-period 0 -s /home/custodian/output -c /home/custodian/securityhub-remediations/module2/ec2-sechub-custom-actions.yml
 ```
 2. You should see lines of output line like the following:
 ```
@@ -145,33 +100,35 @@ docker run -it --rm --group-add 501 -v /home/ec2-user/environment/securityhub-re
 2019-09-01 19:20:32,222: custodian.serverless:INFO Publishing custodian policy lambda function custodian-PostOpsItem
 2019-09-01 19:20:32,222: custodian.serverless:INFO Publishing custodian policy lambda function custodian-RemPA
 ```
-3. Note that the string after 'Provisioning policy lambda" matches the policy names contained within the ec2-sechub-custom-actions.yml file from the last docker command.  The namse of the generated lambda will be composed of that policy names prefixed with "custodian-".  Cloudwatch logs are generated following standard naming convention, /aws/lamabda/custodian-$(PolicyName)
-3. Open the Security Hub Console and click on Findings, or click https://console.aws.amazon.com/securityhub/home?region=us-east-1#/findings?search=RecordState%3D%255Coperator%255C%253AEQUALS%255C%253AACTIVE 
-4. You should see a row where "Title=ec2-force-vulnerabilities", if not then in the Findings search box, type Title, under the pop-up Filters click on Title, then in the new popup, enter "ec2-force-vulnerabilities" then click Apply
-5. Click the checkbox for the finding (There should only be one at this point, but checkbox the first (most recently updated)
-6. Click "Actions" then in the popup click on "Ec2 DenySnapStop"
-7. You should observe a green notification at top of page saying "Successfully send findings to Amazon CloudwatchEvents" and sometime in the future will include the action name once they implement my PFR.
-8. Review the Cloudwatch log of the Lambda which got invoked.  LogGroupNames are composed of the prefix "/aws/lambda/custodian-" followed by the policy name. Lines with "ERROR" indicate something is wrong.  You should see at least a line containing "invoking action:" for each action in the policy.
-9. Optional, you can use the AWS Console and/or cli to confirm that the instance named "RemediationTestTarget" has really be stopped, snapshotted, and the IAM Instance Profile dissassociated.
-10. Now run the following command to reassociate the InstanceProfile so the instance is ready for the next module.
+3. Note that the string after 'Provisioning policy lambda" matches the policy names contained within the ec2-sechub-custom-actions.yml file from the last docker command.  The names of the generated lambdas will be composed of that policy names prefixed with "custodian-".  Cloudwatch logs are generated following standard naming convention, /aws/lamabda/custodian-$(PolicyName)
+4. Within the Management Console, navigate to the Security Hub service.
+5. In the left hand navigation area, click on Findings.
+6. You should see a row where the value of the Title column is "ec2-force-vulnerabilities", if not then in the Findings search box, type Title, under the pop-up Filters click on Title, then in the new popup, enter "ec2-force-vulnerabilities" then click Apply.
+7. Click the checkbox (left hand side) for the finding.  
+8. In the upper right, click "Actions" then in the popup click on "Ec2 DenySnapStop"
+9. You should observe a green notification at top of page saying "Successfully send findings to Amazon CloudwatchEvents".  I've submitted a request to include the action name in that message.
+10. Review the Cloudwatch log of the Lambda which got invoked.  Log Group names are composed of the prefix "/aws/lambda/custodian-" followed by the policy name, so in this case "aws/lambda/custodian-DenySnapStop". Within that log group, open the most recent Log stream.  Lines with "ERROR" indicate something is wrong, please let the event facilitor know if you see an ERROR.  You should see at least a line containing "invoking action:" for each action in the policy. 
+11. Optional: Review the complete payload of the Cloudwatch event which is logged directly after a line (usually line #2) ending with the text "Processing event".
+12. Optional, you can use the AWS Console and/or cli to confirm that the instance named "RemediationTestTarget" has really be stopped, snapshotted, and the IAM Instance Profile dissassociated.
+13. Now run the following command to reassociate the InstanceProfile as it's needed for the next module.
 ```
-aws ec2 associate-iam-instance-profile --iam-instance-profile Name=SecurityHubRemediationWorkshopCli --instance-id $(aws ec2 describe-instances --filters "Name=tag:Name,Values=RemediationTestTarget Name=instance-state-name,Values=stopped" --query Reservations[*].Instances[*].[InstanceId] --output text)
+aws ec2 associate-iam-instance-profile --iam-instance-profile Name=SecurityHubRemediationWorkshopCli --instance-id $(aws ec2 describe-instances --filters Name=tag:Name,Values=RemediationTestTarget Name=instance-state-name,Values=stopped --query Reservations[*].Instances[*].[InstanceId] --output text)
 ```
-11. Now run the following command to start the instance so the instance is ready for the next module.
+14. Now run the following command to start the instance so the instance is ready for the next module.
 ```
-aws ec2 start-instances --instance-ids $(aws ec2 describe-instances --filters "Name=tag:Name,Values=RemediationTestTarget" --query Reservations[*].Instances[*].[InstanceId] --output text)
+aws ec2 start-instances --instance-ids $(aws ec2 describe-instances --filters Name=tag:Name,Values=RemediationTestTarget Name=instance-state-name,Values=stopped --query Reservations[*].Instances[*].[InstanceId] --output text)
 ```
 ## Module 3 - Automated Remediations - GuardDuty DNS Event on EC2 Instance
 1.  Run the following command which runs a policy named [ec2-sechub-remediate-severity-with-findings](https://github.com/FireballDWF/securityhub-remediations/blob/master/module3/ec2-sechub-remediate-severity-with-findings.yml) which instructs Cloud Custodian to dynamically generate and deploy a lambda, which will be invoked when [SecurityHub generates a Cloudwatch Event](https://docs.aws.amazon.com/securityhub/latest/userguide/securityhub-cloudwatch-events.html) when sent a finding. In this module, the finding will be triggered when GuardDuty generates a finding, and the severity of the is greater than or equal to 31, and the EC2 instance has any vulnerability previously reported to SecurityHub
 ```
-docker run -it --rm --group-add 501 -v /home/ec2-user/environment/securityhub-remediations/output:/home/custodian/output:rw -v /home/ec2-user/environment/securityhub-remediations:/home/custodian/securityhub-remediations:ro -v /home/ec2-user/.aws:/home/custodian/.aws:ro ${SECHUBWORKSHOP_CONTAINER} run --cache-period 0 -s /home/custodian/output --profile cc -c /home/custodian/securityhub-remediations/module3/ec2-sechub-remediate-severity-with-findings.yml
+docker run -it --rm --group-add 501 -v /home/ec2-user/environment/securityhub-remediations/output:/home/custodian/output:rw -v /home/ec2-user/environment/securityhub-remediations:/home/custodian/securityhub-remediations:ro -v /home/ec2-user/.aws:/home/custodian/.aws:ro ${SECHUBWORKSHOP_CONTAINER} run --cache-period 0 -s /home/custodian/output -c /home/custodian/securityhub-remediations/module3/ec2-sechub-remediate-severity-with-findings.yml
 ```
 2.  Next run the following command which leverages [Systems Manager's Run Command](https://docs.aws.amazon.com/systems-manager/latest/userguide/execute-remote-commands.html) to run an "nslookup" command on the ec2 instance tag:Name RemediationTestTarget where it's looking up a dns name which [GuardDuty will detect as Command and Control activity](https://docs.aws.amazon.com/guardduty/latest/ug/guardduty_backdoor.html#backdoor7)
 ```
-aws ssm send-command --document-name AWS-RunShellScript --parameters commands=["nslookup guarddutyc2activityb.com"] --targets "Key=tag:Name,Values=RemediationTestTarget" --comment "Force GuardDutyFinding" --cloud-watch-output-config CloudWatchLogGroupName=/aws/ssm/AWS-RunShellScript,CloudWatchOutputEnabled=true --profile cc
+aws ssm send-command --document-name AWS-RunShellScript --parameters commands=["nslookup guarddutyc2activityb.com"] --targets "Key=tag:Name,Values=RemediationTestTarget" --comment "Force GuardDutyFinding" --cloud-watch-output-config CloudWatchLogGroupName=/aws/ssm/AWS-RunShellScript,CloudWatchOutputEnabled=true
 ```
 3.  As it can take a long time (more than 20 minutes often around 2 hours) for GuardDuty to generate a DNS based finding, please proceed to the next module, then come back to the next review step later.
-4.  Review the Logs via https://console.aws.amazon.com/cloudwatch/home?region=us-east-1#logStream:group=/aws/lambda/custodian-ec2-sechub-remediate-severity-with-findings;streamFilter=typeLogStreamPrefix 
+4.  Review the Logs via https://console.aws.amazon.com/cloudwatch/home?region=us-east-1#logStream:group=/aws/lambda/custodian-ec2-sechub-remediate-severity-with-findings;streamFilter=typeLogStreamPrefix {TODO} fix us-east-1 reference, describe what to do.
 
 ## Module 4 - Automated Remediations - Vulnerability Event on EC2 Instance with Very Risky Configuration
 1.  Run the following command, which invokes Cloud Custodian to run a policy named [ec2-public-ingress-hubfinding](https://github.com/FireballDWF/securityhub-remediations/blob/master/module4/ec2-public-ingress-hubfinding.yml) which filters for a high risk configuation (Details TODO).
@@ -242,15 +199,3 @@ docker run -it --rm --group-add 501 -v /home/ec2-user/environment/securityhub-re
 2. Create an new 1GB empty EBS volume, and don't store anything in it or even attach it anywhere.
 3. Create a snapshot of the volume
 4. Set the snapshots's permisisions to be public.
-5. 
-
-
-## Module X - Cleanup
-1.  For maximum cleanup:
-    1. delete the cloudformation stack 
-    2. disable SecurityHub, which is really not recommended.
-    3. TODO: Details about CloudCustodian lambda, cloudwatch events and logs
-2.  If you did not choose to execute the delete the cloudformation stack step, you should at least terminate the EC2 instance used as a test target by runnning the following:
-```
-aws ec2 terminate-instances --instance-ids $(aws ec2 describe-instances --filters "Name=tag:Name,Values=RemediationTestTarget" --query Reservations[*].Instances[*].[InstanceId] --output text)
-```
