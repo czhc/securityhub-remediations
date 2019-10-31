@@ -133,11 +133,11 @@ aws ssm send-command --document-name AWS-RunShellScript --parameters commands=["
 ## Module 4 - Automated Remediations - Vulnerability Event on EC2 Instance with Very Risky Configuration
 1.  Run the following command, which invokes Cloud Custodian to run a policy named [ec2-public-ingress-hubfinding](https://github.com/FireballDWF/securityhub-remediations/blob/master/module4/ec2-public-ingress-hubfinding.yml) which filters for a high risk configuation (Details TODO).
 ```
-docker run -it --rm --group-add 501 -v /home/ec2-user/environment/securityhub-remediations/output:/home/custodian/output:rw -v /home/ec2-user/environment/securityhub-remediations:/home/custodian/securityhub-remediations:ro -v /home/ec2-user/.aws:/home/custodian/.aws:ro ${SECHUBWORKSHOP_CONTAINER} run --cache-period 0 -s /home/custodian/output --profile cc -c /home/custodian/securityhub-remediations/module4/ec2-public-ingress-hubfinding.yml
+docker run -it --rm --group-add 501 -v /home/ec2-user/environment/securityhub-remediations/output:/home/custodian/output:rw -v /home/ec2-user/environment/securityhub-remediations:/home/custodian/securityhub-remediations:ro -v /home/ec2-user/.aws:/home/custodian/.aws:ro ${SECHUBWORKSHOP_CONTAINER} run --cache-period 0 -s /home/custodian/output -c /home/custodian/securityhub-remediations/module4/ec2-public-ingress-hubfinding.yml
 ```
 2.  Run the following command to trigger an finding event in Security Hub on the with the resource being the RemediationTestTarget instance. 
 ```
-docker run -it --rm --group-add 501 -v /home/ec2-user/environment/securityhub-remediations/output:/home/custodian/output:rw -v /home/ec2-user/environment/securityhub-remediations:/home/custodian/securityhub-remediations:ro -v /home/ec2-user/.aws:/home/custodian/.aws:ro ${SECHUBWORKSHOP_CONTAINER} run --cache-period 0 -s /home/custodian/output --profile cc -c /home/custodian/securityhub-remediations/module1/force-vulnerability-finding.yml  
+docker run -it --rm --group-add 501 -v /home/ec2-user/environment/securityhub-remediations/output:/home/custodian/output:rw -v /home/ec2-user/environment/securityhub-remediations:/home/custodian/securityhub-remediations:ro -v /home/ec2-user/.aws:/home/custodian/.aws:ro ${SECHUBWORKSHOP_CONTAINER} run --cache-period 0 -s /home/custodian/output -c /home/custodian/securityhub-remediations/module1/force-vulnerability-finding.yml  
 ```
 3.  Review the Logs via https://console.aws.amazon.com/cloudwatch/home?region=us-east-1#logStream:group=/aws/lambda/custodian-ec2-public-ingress-hubfinding;streamFilter=typeLogStreamPrefix 
 4.  Review module4/ec2-public-ingress.yml observing that the lack of a "mode" section means it can be run anytime to find the risky configuration without requiring a vulnerability event.
@@ -145,15 +145,14 @@ docker run -it --rm --group-add 501 -v /home/ec2-user/environment/securityhub-re
 ```
 aws ec2 associate-iam-instance-profile --iam-instance-profile Name=SecurityHubRemediationWorkshopCli --instance-id $(aws ec2 describe-instances --filters "Name=tag:Name,Values=RemediationTestTarget" --query Reservations[*].Instances[*].[InstanceId] --output text)
 ```
-6.  Future Addition: Similar policy as a config rule
   
 ## Module 5 - Automated Remediations - GuardDuty Event on IAMUser
 1. Run the following command:
 ```
-docker run -it --rm --group-add 501 -v /home/ec2-user/environment/securityhub-remediations/output:/home/custodian/output:rw -v /home/ec2-user/environment/securityhub-remediations:/home/custodian/securityhub-remediations:ro -v /home/ec2-user/.aws:/home/custodian/.aws:ro ${SECHUBWORKSHOP_CONTAINER} run --cache-period 0 -s /home/custodian/output --profile cc -c /home/custodian/securityhub-remediations/module5/iam-user-hubfinding-remediate-disable.yml
+docker run -it --rm --group-add 501 -v /home/ec2-user/environment/securityhub-remediations/output:/home/custodian/output:rw -v /home/ec2-user/environment/securityhub-remediations:/home/custodian/securityhub-remediations:ro -v /home/ec2-user/.aws:/home/custodian/.aws:ro ${SECHUBWORKSHOP_CONTAINER} run --cache-period 0 -s /home/custodian/output -c /home/custodian/securityhub-remediations/module5/iam-user-hubfinding-remediate-disable.yml
 ```
 2.  Verify that the previous command resulted in output containing "Provisioning policy lambda iam-user-hubfinding-remediate-disable"
-3.  Next archive any existing sample GuardDuty Findings for the IAM User named GeneratedFindingUserName.  While this is not nessesary when the create-sample-findings command (which is run later in this module) has never been run before, it won't harm anything to run.  And if it's not run and the sample finding has already been generated, then the cloudwatch event needed for this module to function never gets triggered, so we're running it to eliminate sources of potential error.  And if you want to rerun this module, you need to run this command.
+3.  Optional, but at least read: Next archive any existing sample GuardDuty Findings for the IAM User named GeneratedFindingUserName.  While this is not nessesary when the create-sample-findings command (which is run later in this module) has never been run before, it won't harm anything to run.  And if it's not run and the sample finding has already been generated, then the cloudwatch event needed for this module to function never gets triggered, so we're running it to eliminate sources of potential error.  And if you want to rerun this module, you need to run this command.
 ```
 aws guardduty archive-findings \
     --detector-id \
@@ -164,6 +163,7 @@ aws guardduty archive-findings \
                 $(aws guardduty list-detectors --query DetectorIds --output text) \
             --finding-criteria '{"Criterion": {"service.archived": {"Eq":["false"]},"resource.accessKeyDetails.userName": {"Eq":["GeneratedFindingUserName"]}}}' --query 'FindingIds[0]' --output text)
 ```
+If you get an error like "InternalServerErrorException", the most likely explaination is that there are no findings currently, and if, you can move on the next step.
 4.  Archive any existing findings of this type in Security Hub, to be on the safe side.
 ```
 aws securityhub update-findings --record-state ARCHIVED --filters '{"ResourceAwsIamAccessKeyUserName":[{"Value": "GeneratedFindingUserName","Comparison":"EQUALS"}]}' 
@@ -184,9 +184,6 @@ aws guardduty create-sample-findings --detector-id `aws guardduty list-detectors
 aws iam list-access-keys --user-name GeneratedFindingUserName
 ```
 10. Evaluate the output by looking for "Status"="Inactive"
-11. Optional Steps: One of the other Custom Actions which got deployed to Security Hub is named "Iam-User DisableKey". If you would like to test it, run the following command to reactivate the AccessKey, then repeat the step (earlier in this module) for generating a sample finding with GuardDuty, wait for the finding event to be generated and show up in SecurityHub, then view the finding in SecurityHub, check the box for the finding, then select the custom action named "Iam-User DisableKey", then repeat the "list-access-key" step to confirm the inactive status of the keys.
-```
-aws iam update-access-key --user-name GeneratedFindingUserName --status Active --access-key-id $(aws iam list-access-keys --user-name GeneratedFindingUserName --query AccessKeyMetadata[0].AccessKeyId --output text) --profile cc
 ``` 
 
 ## Module 6 - Optional - Remediate an Public EBS-Snapshot 
@@ -194,8 +191,10 @@ aws iam update-access-key --user-name GeneratedFindingUserName --status Active -
 1. There Be Dragons: This module requires an EBS-Snapshot which has been shared with the public.  If you create one, and if you account is monitored by your organization which looks for such an issue, then depending on timing, a ticket may get generated, assigned to you with notification to one or more people in your management chain and/or security team.
 2. Run the following command:
 ```
-docker run -it --rm --group-add 501 -v /home/ec2-user/environment/securityhub-remediations/output:/home/custodian/output:rw -v /home/ec2-user/environment/securityhub-remediations:/home/custodian/securityhub-remediations:ro -v /home/ec2-user/.aws:/home/custodian/.aws:ro ${SECHUBWORKSHOP_CONTAINER} run --cache-period 0 -s /home/custodian/output --profile cc -c /home/custodian/securityhub-remediations/module6/post-ebs-snapshot-public.yml
+docker run -it --rm --group-add 501 -v /home/ec2-user/environment/securityhub-remediations/output:/home/custodian/output:rw -v /home/ec2-user/environment/securityhub-remediations:/home/custodian/securityhub-remediations:ro -v /home/ec2-user/.aws:/home/custodian/.aws:ro ${SECHUBWORKSHOP_CONTAINER} run --cache-period 0 -s /home/custodian/output -c /home/custodian/securityhub-remediations/module6/post-ebs-snapshot-public.yml
 
 2. Create an new 1GB empty EBS volume, and don't store anything in it or even attach it anywhere.
 3. Create a snapshot of the volume
 4. Set the snapshots's permisisions to be public.
+5. TODO: Provide CLI or Cloudformation for the above steps. dynamically change the org-id in the cloud custodian policy
+6. TODO: Describe what they should look for.
