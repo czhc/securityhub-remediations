@@ -5,7 +5,6 @@ policies:
       type: periodic
       schedule: "rate(5 minutes)"
       role: arn:aws:iam::{account_id}:role/CloudCustodian
-      packages: [botocore, boto3, urllib3]
       memory: 128
       tags:
         CostCenter: SecurityHubWorkshop
