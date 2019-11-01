@@ -192,7 +192,7 @@ aws iam list-access-keys --user-name GeneratedFindingUserName
 2. Run the following command:
 ```
 docker run -it --rm --group-add 501 -v /home/ec2-user/environment/securityhub-remediations/output:/home/custodian/output:rw -v /home/ec2-user/environment/securityhub-remediations:/home/custodian/securityhub-remediations:ro -v /home/ec2-user/.aws:/home/custodian/.aws:ro ${SECHUBWORKSHOP_CONTAINER} run --cache-period 0 -s /home/custodian/output -c /home/custodian/securityhub-remediations/module6/post-ebs-snapshot-public.yml
-
+```
 2. Create an new 1GB empty EBS volume, and don't store anything in it or even attach it anywhere.
 3. Create a snapshot of the volume
 4. Set the snapshots's permisisions to be public.
