@@ -183,8 +183,8 @@ aws guardduty create-sample-findings --detector-id `aws guardduty list-detectors
 ```
 aws iam list-access-keys --user-name GeneratedFindingUserName
 ```
-10. Evaluate the output by looking for "Status"="Inactive"
-``` 
+11. Evaluate the output by looking for "Status"="Inactive"
+
 
 ## Module 6 - Optional - Remediate an Public EBS-Snapshot 
 
