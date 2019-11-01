@@ -1,7 +1,7 @@
 policies:
   - name: DenySnapStop
     resource: ec2
-    description: Deny all access by removing Instance Profile, Stop the Instance
+    description: Deny all access by removing Instance Profile, Snapping the volume, and Stopping the Instance
     mode:
         type: hub-action
         role: arn:aws:iam::{account_id}:role/CloudCustodian
