@@ -15,10 +15,6 @@ policies:
       - type: event
         key: detail.findings[0].Types[0]
         value: "TTPs/UnauthorizedAccess:IAMUser-MaliciousIPCaller"
-      #- type: event
-      #  key: detail.Severity.Normalized
-      #  value: 50
-      #  value_type: integer
     actions: 
       - type: remove-keys
         disable: true
