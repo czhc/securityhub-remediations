@@ -118,6 +118,8 @@ aws ec2 associate-iam-instance-profile --iam-instance-profile Name=SecurityHubRe
 ```
 aws ec2 start-instances --instance-ids $(aws ec2 describe-instances --filters Name=tag:Name,Values=RemediationTestTarget Name=instance-state-name,Values=stopped --query Reservations[*].Instances[*].[InstanceId] --output text)
 ```
+15.  Optional: Using the same finding from step 6 & 7, invoke the custom action "Ec2 PostOpsItem" then open a new browser tab to view the item in Systems Manager's "OpsCenter"
+
 ## Module 3 - Automated Remediations - GuardDuty DNS Event on EC2 Instance
 1.  Run the following command which runs a policy named [ec2-sechub-remediate-severity-with-findings](https://github.com/FireballDWF/securityhub-remediations/blob/master/module3/ec2-sechub-remediate-severity-with-findings.yml) which instructs Cloud Custodian to dynamically generate and deploy a lambda, which will be invoked when [SecurityHub generates a Cloudwatch Event](https://docs.aws.amazon.com/securityhub/latest/userguide/securityhub-cloudwatch-events.html) when sent a finding. In this module, the finding will be triggered when GuardDuty generates a finding, and the severity of the is greater than or equal to 31, and the EC2 instance has any vulnerability previously reported to SecurityHub
 ```
