@@ -28,7 +28,6 @@ Parameters:
     Type: 'String'
     Default: 't2.micro'
     Description: 'The type of instance for the Cloud9 environment (for example, t2.micro)'
-    AllowedPattern: "^[a-z][1-9][.][a-z0-9]+$"
   Cloud9EnvName:
     Type: 'String'
     Description: 'Name of the Cloud9 Environment'
