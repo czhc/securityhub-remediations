@@ -34,7 +34,7 @@ Parameters:
     Default: 'SecurityHubWorkshop'
   TestTargetInstanceType:
     Type: 'String'
-    Default: 't3a.micro'
+    Default: 't2.micro'
     Description: 'The type of instance for the Remediation Test Target (for example, t2.micro)'
   Cloud9OwnerArn: 
     Type: 'String'
