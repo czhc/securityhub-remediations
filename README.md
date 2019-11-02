@@ -190,26 +190,40 @@ aws iam list-access-keys --user-name GeneratedFindingUserName
 
 ## Module 6 - Optional - Remediate an Public EBS-Snapshot 
 
-1. There Be Dragons: This module requires an EBS-Snapshot which has been shared with the public.  If you create one, and if you account is monitored by your organization which looks for such an issue, then depending on timing, a ticket may get generated, assigned to you with notification to one or more people in your management chain and/or security team.
-2. Run the following command:
+This module will show how to setup an automated detection of a EBS Snaspshot that has been made public, with a finding submitted to Security Hub, then use Security Hub Custom action to delete the snapshot.  Then we'll fully automate the remediation by changing the detection policy to perform the delete while still providing notification.  
+1. Start by reviewing the file "post-ebs-snapshot-public.yml" using the Cloud9 IDE. Observe that the only action type is "post-finding". Also Observe that the following two lines instruct Cloud Custodian to deploy a CloudWatch rule which triggers on a regular schedule, configured to be every 5 minutes.
+```
+      type: periodic
+      schedule: "rate(5 minutes)"
+```
+2. Then deploy the automated detection policy by running the following command:
 ```
 docker run -it --rm --group-add 501 -v /home/ec2-user/environment/securityhub-remediations/output:/home/custodian/output:rw -v /home/ec2-user/environment/securityhub-remediations:/home/custodian/securityhub-remediations:ro -v /home/ec2-user/.aws:/home/custodian/.aws:ro ${SECHUBWORKSHOP_CONTAINER} run --cache-period 0 -s /home/custodian/output -c /home/custodian/securityhub-remediations/module6/post-ebs-snapshot-public.yml
 ```
-2. Create an new 1GB empty EBS volume, and don't store anything in it or even attach it anywhere.
+2. Next we need to create a new EBS volume, however no data will be stored in it, it will not be attached anywhere.  Note how the VolumeId is saved for the next step.
 ```
 export WorkshopVolumeId=$(aws ec2 create-volume --availability-zone $(aws ec2 describe-availability-zones --query AvailabilityZones[0].ZoneName --output text) --size 1 --query VolumeId --output text)
 ```
-then snapshot it
-```
 
+3. Then we Snapshot the volume just created, also saving the SnapshotId for a future step.
+```
 export WorkshopSnapshotId=$(aws ec2 create-snapshot --volume-id $WorkshopVolumeId --query SnapshotId --output text)
-
 ```
 
+4. This step makes the snapshot public.
 ```
-aws ec2 modify-snapshot-attribute --snapshot-id $WorkshopSnapshotId --attribute createVolumePermission --operation-type add -group-names all
+aws ec2 modify-snapshot-attribute --snapshot-id $WorkshopSnapshotId --attribute createVolumePermission --operation-type add --group-names all
 ```
-3. Create a snapshot of the volume
-4. Set the snapshots's permisisions to be public.
-5. TODO: Provide CLI or Cloudformation for the above steps. dynamically change the org-id in the cloud custodian policy
-6. TODO: Describe what they should look for.
+
+5. Now navigate to the Findings part of Security Hub's console.  Look for a finding who's title is the same as the policy name from step 1 then click it's checkbox.  If you don't see it, you may need to wait up to 5 minutes (remember the schedule based CloudWatch Rule from Step 1) for it to appear after refreshing the browser.
+6. Click the dropdown for Actions then select "Ebs-Snapshot Delete" (This custom action is one of the ones deployed in Module 2).
+7. Confirm the snapshot got deleted by running:
+```
+aws ec2 describe-snapshots --snapshot-ids $WorkshopSnapshotId
+```
+then confirming the response is similar to:
+```
+An error occurred (InvalidSnapshot.NotFound) when calling the DescribeSnapshots operation: The snapshot 'snap-0643b6dcd0a6f01f0' does not exist.
+```
+
+8. TODO: Describe how to add a delete action then repeat steps 3, 4 and 7.
