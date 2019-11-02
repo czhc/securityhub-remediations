@@ -196,6 +196,19 @@ aws iam list-access-keys --user-name GeneratedFindingUserName
 docker run -it --rm --group-add 501 -v /home/ec2-user/environment/securityhub-remediations/output:/home/custodian/output:rw -v /home/ec2-user/environment/securityhub-remediations:/home/custodian/securityhub-remediations:ro -v /home/ec2-user/.aws:/home/custodian/.aws:ro ${SECHUBWORKSHOP_CONTAINER} run --cache-period 0 -s /home/custodian/output -c /home/custodian/securityhub-remediations/module6/post-ebs-snapshot-public.yml
 ```
 2. Create an new 1GB empty EBS volume, and don't store anything in it or even attach it anywhere.
+```
+export WorkshopVolumeId=$(aws ec2 create-volume --availability-zone $(aws ec2 describe-availability-zones --query AvailabilityZones[0].ZoneName --output text) --size 1 --query VolumeId --output text)
+```
+then snapshot it
+```
+
+export WorkshopSnapshotId=$(aws ec2 create-snapshot --volume-id $WorkshopVolumeId --query SnapshotId --output text)
+
+```
+
+```
+aws ec2 modify-snapshot-attribute --snapshot-id $WorkshopSnapshotId --attribute createVolumePermission --operation-type add -group-names all
+```
 3. Create a snapshot of the volume
 4. Set the snapshots's permisisions to be public.
 5. TODO: Provide CLI or Cloudformation for the above steps. dynamically change the org-id in the cloud custodian policy
