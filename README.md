@@ -62,7 +62,7 @@ You should expect to see 2 output lines, one containing "count:1" and another co
 2019-08-11 16:33:57,787: custodian.policy:INFO policy:ec2-force-vulnerabilities action:instancefinding resources:1 execution_time:0.46
 ```
 
-    Here is a breakdown of the command you just ran:
+Here is a breakdown of the command you just ran:
     
 | Command line Component | Explaination |
 | --------- | ------------ |
