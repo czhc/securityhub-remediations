@@ -25,6 +25,7 @@ Your feedback is highly desired, please [submit a new issue](https://github.com/
 3. Module 3 - Automated Remediations - GuardDuty DNS Event on EC2 Instance
 4. Module 4 - Automated Remediations - Vulnerability Event on EC2 Instance with Very Risky Configuration
 5. Module 5 - Automated Remediations - GuardDuty Event on IAMUser
+6. Module 6 - Remediate an Public EBS-Snapshot 
 
 
 ## Module 1 - Environment Build and Configuration
@@ -188,7 +189,7 @@ aws iam list-access-keys --user-name GeneratedFindingUserName
 11. Evaluate the output by looking for "Status"="Inactive"
 
 
-## Module 6 - Optional - Remediate an Public EBS-Snapshot 
+## Module 6 - Remediate an Public EBS-Snapshot 
 
 This module will show how to setup an automated detection of a EBS Snaspshot that has been made public, with a finding submitted to Security Hub, then use Security Hub Custom action to delete the snapshot.  Then we'll fully automate the remediation by changing the detection policy to perform the delete while still providing notification.  
 1. Start by reviewing the file "post-ebs-snapshot-public.yml" using the Cloud9 IDE. Observe that the only action type is "post-finding". Also Observe that the following two lines instruct Cloud Custodian to deploy a CloudWatch rule which triggers on a regular schedule, configured to be every 5 minutes.
@@ -242,7 +243,7 @@ aws ec2 modify-snapshot-attribute --snapshot-id $WorkshopSnapshotId --attribute 
 aws ec2 describe-snapshots --snapshot-ids $WorkshopSnapshotId
 ```
 13. Repeat running the last command, the describe-snapshots one, until either the InvalidSnapshot.NotFound error is received (which means success, move on the the next step) or if after 5 minutes it still has not been deleted, the most likely cause is Step 9 did not get done correctly, review the CloudWatch logs for the policy, or the file did not get saved (view the file from the terminal to see if it has the type: delete line), or the policy did not get redeployed in step 11.
-14. Optional: The remainder of this module shows you how to customize the automated remediation by adding an exception filter.  If you have a use case for publicly sharing a snapshot, a change to the policy could be made to filter for only those snapshots which do not have a specific value for a specific tag. In this example we use the Tag key of "PublicIntent" and Tag value of "True".  Start by updating the filter section of the policy by inserting the following lines at line 13 or 16, as long as it's within the filter section and doesn't overlap the existing filter, with the dash character at column 13.  The way to read the filter match the condition of not-equal when testing for Tag key of value. Thus resources which have this tag value will get filtered out aka excluded, thus the actions will not get invoked on those filtered out resources.
+14. The remainder of this module shows you how to customize the automated remediation by adding an exception filter then provides information on more advanced filters.  If you have a use case for publicly sharing a snapshot, a change to the policy could be made to filter for only those snapshots which do not have a specific value for a specific tag. In this example we use the Tag key of "PublicIntent" and Tag value of "True".  Start by updating the filter section of the policy by inserting the following lines at line 13 or 16, as long as it's within the filter section and doesn't overlap the existing filter, with the dash character at column 13.  The way to read the filter match the condition of not-equal when testing for Tag key of value. Thus resources which have this tag value will get filtered out aka excluded, thus the actions will not get invoked on those filtered out resources.
 ```
       - type: value
         op: not-equal
@@ -270,3 +271,25 @@ sleep 300 ; aws ec2 describe-snapshots --snapshot-ids $WorkshopSnapshotId
 ```
 aws ec2 delete-snapshots --snapshot-ids $WorkshopSnapshotId
 ```
+21. To learn more about the types of filters that can be added to any Cloud Custodian Policy, click [generic filters](https://cloudcustodian.io/docs/filters.html).  
+22. To learn about the filters that can be applied to EBS Snapshots, run the following:
+```
+docker run -it --rm ${SECHUBWORKSHOP_CONTAINER} schema ebs-snapshot.filters
+```
+23. To learn more about the attributes of a specific filter, append the filters name to the command, like the following example for the skip-ami-snapshots filter
+```
+docker run -it --rm ${SECHUBWORKSHOP_CONTAINER} schema ebs-snapshot.filters.skip-ami-snapshots
+```
+26. To learn about what AWS resource types are supported by Cloud Custodian, run the following:
+```
+docker run -it --rm ${SECHUBWORKSHOP_CONTAINER} schema aws
+```
+27. The actions supported by a specific resource can be viewed by using the schema command with the parameter of <resource_type>.actions, like in the following:
+```
+docker run -it --rm ${SECHUBWORKSHOP_CONTAINER} schema ebs-snapshot.actions
+```
+28. And just like filters, the attributes for a given action can be viewed by running the schema command specifing the <resource_type>.actions.<action_name>, like the following:
+```
+docker run -it --rm ${SECHUBWORKSHOP_CONTAINER} schema ebs-snapshot.actions.post-item
+```
+TODO: Learn more about post-findings, put in prior section
