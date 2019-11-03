@@ -1,5 +1,6 @@
 policies:
   - name: post-ebs-snapshot-public
+    description: post findings if snapshot shared outside of org which includes if public
     resource: ebs-snapshot
     mode:
       type: periodic
