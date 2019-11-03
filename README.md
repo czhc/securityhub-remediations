@@ -114,12 +114,13 @@ docker run -it --rm --cap-drop ALL --group-add 501 -v /home/ec2-user/environment
 12. Optional, you can use the AWS Console and/or cli to confirm that the instance named "RemediationTestTarget" has really be stopped, snapshotted, and the IAM Instance Profile dissassociated.
 13. Now run the following command to reassociate the InstanceProfile as it's needed for the next module.
 ```
-aws ec2 associate-iam-instance-profile --iam-instance-profile Name=SecurityHubRemediationWorkshopCli --instance-id $(aws ec2 describe-instances --filters Name=tag:Name,Values=RemediationTestTarget Name=instance-state-name,Values=stopped --query Reservations[*].Instances[*].[InstanceId] --output text)
+aws ec2 associate-iam-instance-profile --iam-instance-profile Name=SecurityHubRemediationWorkshopCli --instance-id $(aws ec2 describe-instances --filters Name=tag:Name,Values=RemediationTestTarget --query Reservations[*].Instances[*].[InstanceId] --output text)
 ```
 14. Now run the following command to start the instance so the instance is ready for the next module.
 ```
 aws ec2 start-instances --instance-ids $(aws ec2 describe-instances --filters Name=tag:Name,Values=RemediationTestTarget Name=instance-state-name,Values=stopped --query Reservations[*].Instances[*].[InstanceId] --output text)
 ```
+If you get an error, the most likely reason is that the instance is still in the stopping state, wait 5-10 seconds then retry.
 15.  Optional: Using the same finding from step 6 & 7, invoke the custom action "Ec2 PostOpsItem" then open a new browser tab to view the item in Systems Manager's "OpsCenter"
 
 ## Module 3 - Automated Remediations - GuardDuty DNS Event on EC2 Instance
