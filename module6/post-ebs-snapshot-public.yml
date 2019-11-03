@@ -21,3 +21,4 @@ policies:
       recommendation: "Delete Snapshot or at least remove public access or any access outside your org"
       confidence: 100
       compliance_status: FAILED
+    - type: delete
