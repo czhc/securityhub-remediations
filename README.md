@@ -39,18 +39,18 @@ Note: GuardDuty and SecurityHub have already been enabled in the account used fo
 ```
 git clone --single-branch --branch eventengineenablement https://github.com/FireballDWF/securityhub-remediations.git
 ```
-6. Next step is to change into the directory created by the clone operation and then create a directory for the outpot of some commands to be written to.
+6.  Next step is to change into the directory created by the clone operation and then create a directory for the outpot of some commands to be written to.
 ```
 cd securityhub-remediations
 mkdir output
 
 ```
-12.  Next step is to pull down the latest version of the Cloud Custodian docker container image.
+7.  Next step is to pull down the latest version of the Cloud Custodian docker container image.
 ```
 export SECHUBWORKSHOP_CONTAINER=cloudcustodian/c7n
 docker pull ${SECHUBWORKSHOP_CONTAINER} 
 ```
-13.  This step tests the environment by invoking a Cloud Custodian Policy which reports that an ec2 instance has a vulnerability.
+8.  This step tests the environment by invoking a Cloud Custodian Policy which reports that an ec2 instance has a vulnerability.
 ```
 docker run -it --rm --cap-drop ALL --group-add 501 -v /home/ec2-user/environment/securityhub-remediations/output:/home/custodian/output:rw -v /home/ec2-user/environment/securityhub-remediations:/home/custodian/securityhub-remediations:ro -v /home/ec2-user/.aws:/home/custodian/.aws:ro ${SECHUBWORKSHOP_CONTAINER} run --cache-period 0 -s /home/custodian/output -c /home/custodian/securityhub-remediations/module1/force-vulnerability-finding.yml  
 ```
@@ -79,7 +79,7 @@ Here is a breakdown of the command you just ran:
 | --cache-period 0 | disables cloud custodian's caching of api call results |
 | -s /home/custodian/output | specifies where log and resource data is placed | 
 | -c /home/custodian/securityhub-remediations/module1/force-vulnerability-finding.yml | specifies the actual policy to run | 
-14.  If you received the expected output lines, congratulations, you have successfully tested the environment setup by having Cloud Custodian submit a finding to Security Hub.  Proceed to the next module.
+9.  If you received the expected output lines, congratulations, you have successfully tested the environment setup by having Cloud Custodian submit a finding to Security Hub.  Proceed to the next module.
 
 ## Module 2 - Security Hub Custom Actions - Human initiated automation
 Custom Actions in Security Hub are useful for analysts working with the Security Hub console who want to send a specific finding, or a small set of findings, to a response or remediation workflow.
