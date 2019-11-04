@@ -148,7 +148,8 @@ docker run -it --rm --group-add 501 -v /home/ec2-user/environment/securityhub-re
 ```
 aws ec2 associate-iam-instance-profile --iam-instance-profile Name=SecurityHubRemediationWorkshopCli --instance-id $(aws ec2 describe-instances --filters "Name=tag:Name,Values=RemediationTestTarget" --query Reservations[*].Instances[*].[InstanceId] --output text)
 ```
-5.  Optional: Review module4/ec2-public-ingress.yml observing that the lack of a "mode" section, compared to the policy deployed earlier in the module, means it can be run anytime to find the risky configuration without requiring a vulnerability event.
+5.  Review module4/ec2-public-ingress.yml observing that the lack of a "mode" section, compared to the policy deployed earlier in the module, means it can be run anytime from a CLI to find the risky configuration without requiring a vulnerability event.
+6.  
 
 ## Module 5 - Automated Remediations - GuardDuty Event on IAMUser
 1. Run the following command:
