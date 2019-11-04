@@ -20,6 +20,6 @@ policies:
       types:
         - "Software and Configuration Checks/AWS Security Best Practices"
       recommendation: "Delete Snapshot or at least remove public access or any access outside your org"
+      recommendation_url: "https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/ebs-modifying-snapshot-permissions.html"
       confidence: 100
       compliance_status: FAILED
-    - type: delete
