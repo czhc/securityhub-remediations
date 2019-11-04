@@ -132,7 +132,7 @@ docker run -it --rm --group-add 501 -v /home/ec2-user/environment/securityhub-re
 aws ssm send-command --document-name AWS-RunShellScript --parameters commands=["nslookup guarddutyc2activityb.com"] --targets "Key=tag:Name,Values=RemediationTestTarget" --comment "Force GuardDutyFinding" --cloud-watch-output-config CloudWatchLogGroupName=/aws/ssm/AWS-RunShellScript,CloudWatchOutputEnabled=true
 ```
 3.  As it can take a long time (more than 20 minutes often around 2 hours) for GuardDuty to generate a DNS based finding, please proceed to the next module, then come back to the next review step later.
-4.  Review the Logs via https://console.aws.amazon.com/cloudwatch/home?region=us-east-1#logStream:group=/aws/lambda/custodian-ec2-sechub-remediate-severity-with-findings;streamFilter=typeLogStreamPrefix {TODO} fix us-east-1 reference, describe what to do.
+4.  Review Cloudwatch Logs to see that it removed the InstanceProfile and did a Snapshot. 
 
 ## Module 4 - Automated Remediations - Vulnerability Event on EC2 Instance with Very Risky Configuration
 1.  Run the following command, which invokes Cloud Custodian to run a policy named [ec2-public-ingress-hubfinding](https://github.com/FireballDWF/securityhub-remediations/blob/master/module4/ec2-public-ingress-hubfinding.yml) which filters for a high risk configuation (Details TODO).
@@ -143,13 +143,13 @@ docker run -it --rm --group-add 501 -v /home/ec2-user/environment/securityhub-re
 ```
 docker run -it --rm --group-add 501 -v /home/ec2-user/environment/securityhub-remediations/output:/home/custodian/output:rw -v /home/ec2-user/environment/securityhub-remediations:/home/custodian/securityhub-remediations:ro -v /home/ec2-user/.aws:/home/custodian/.aws:ro ${SECHUBWORKSHOP_CONTAINER} run --cache-period 0 -s /home/custodian/output -c /home/custodian/securityhub-remediations/module1/force-vulnerability-finding.yml  
 ```
-3.  Review the Logs via https://console.aws.amazon.com/cloudwatch/home?region=us-east-1#logStream:group=/aws/lambda/custodian-ec2-public-ingress-hubfinding;streamFilter=typeLogStreamPrefix 
-4.  Review module4/ec2-public-ingress.yml observing that the lack of a "mode" section means it can be run anytime to find the risky configuration without requiring a vulnerability event.
-5.  Now run the following command to re-associate the InstanceProfile so the instance is ready for the next module.
+3.  Review the CloudWatch Log to observe that actions listed in the policy were invoked, and you can verify by using the console to view that the instance doesn't have an IAM Profile associated anymore and that a Snapshot was taken. 
+4.  Now run the following command to re-associate the InstanceProfile so the instance is ready for the next module.
 ```
 aws ec2 associate-iam-instance-profile --iam-instance-profile Name=SecurityHubRemediationWorkshopCli --instance-id $(aws ec2 describe-instances --filters "Name=tag:Name,Values=RemediationTestTarget" --query Reservations[*].Instances[*].[InstanceId] --output text)
 ```
-  
+5.  Optional: Review module4/ec2-public-ingress.yml observing that the lack of a "mode" section, compared to the policy deployed earlier in the module, means it can be run anytime to find the risky configuration without requiring a vulnerability event.
+
 ## Module 5 - Automated Remediations - GuardDuty Event on IAMUser
 1. Run the following command:
 ```
