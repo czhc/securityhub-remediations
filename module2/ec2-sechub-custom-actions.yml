@@ -52,6 +52,7 @@ policies:
         type: hub-action
         role: arn:aws:iam::{account_id}:role/CloudCustodian
         memory: 128
+        packages: [botocore, boto3, urllib3]
         tags:
           CostCenter: SecurityHubWorkshop
           CreatedBy: CloudCustodian
