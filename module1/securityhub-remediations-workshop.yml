@@ -94,7 +94,7 @@ Resources:
               - "ec2:Describe*"
               - "guardduty:CreateSampleFindings"
               - "guardduty:ArchiveFindings"
-              - "ssm:SendCommand",
+              - "ssm:SendCommand"
               - "lambda:ListFunctions"
             Resource: "*"
 
